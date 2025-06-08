@@ -2,6 +2,7 @@ package com.engsoftware.apifuncionario;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -53,5 +54,23 @@ public class FuncionarioServiceTest
         assertEquals(funcionario.getPassword(), funcionarioEncontrado.getPassword());
         assertEquals(funcionario.getSetor(), funcionarioEncontrado.getSetor());
     }
+
+    @Test
+    void ErroBuscarFuncionarioExistenteporCpf(){
+        FuncionarioModel funcionario = new FuncionarioModel();
+        funcionario.setCpf("05460769102");
+        funcionario.setName("Teste");
+        funcionario.setEmail("XKt0q@example.com");
+        funcionario.setPassword("12345678");
+        funcionario.setSetor(Setor.TI);
+        when(repository.findByCpf("05460769102")).thenReturn(Optional.of(funcionario));
+
+        //Cpf diferente do cadastrado anteriormente.
+        FuncionarioModel funcionarioEncontrado = service.buscarFuncionarioPorCpf("05460769102");
+
+        assertNull(funcionarioEncontrado);
+    }
+
+
 
 }
