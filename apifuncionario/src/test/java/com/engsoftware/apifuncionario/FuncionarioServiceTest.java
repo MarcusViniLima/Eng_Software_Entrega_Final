@@ -3,6 +3,8 @@ package com.engsoftware.apifuncionario;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -18,6 +20,7 @@ import com.engsoftware.apifuncionario.model.FuncionarioModel;
 import com.engsoftware.apifuncionario.model.enums.Setor;
 import com.engsoftware.apifuncionario.repositorios.FuncionarioRepository;
 import com.engsoftware.apifuncionario.services.FuncionarioService;
+import com.engsoftware.apifuncionario.validate.exceptions.FuncionarioNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -57,18 +60,15 @@ public class FuncionarioServiceTest
 
     @Test
     void ErroBuscarFuncionarioExistenteporCpf(){
-        FuncionarioModel funcionario = new FuncionarioModel();
-        funcionario.setCpf("05460769102");
-        funcionario.setName("Teste");
-        funcionario.setEmail("XKt0q@example.com");
-        funcionario.setPassword("12345678");
-        funcionario.setSetor(Setor.TI);
-        when(repository.findByCpf("05460769102")).thenReturn(Optional.of(funcionario));
+        String cpfInvalido = "000.000.000-00";
+        when(repository.findByCpf(cpfInvalido)).thenReturn(Optional.empty());
 
-        //Cpf diferente do cadastrado anteriormente.
-        FuncionarioModel funcionarioEncontrado = service.buscarFuncionarioPorCpf("05460769102");
+        assertThrows(FuncionarioNotFoundException.class, () -> {
+            service.buscarFuncionarioPorCpf(cpfInvalido);
+        });
 
-        assertNull(funcionarioEncontrado);
+        verify(repository).findByCpf(cpfInvalido);
+
     }
 
 
