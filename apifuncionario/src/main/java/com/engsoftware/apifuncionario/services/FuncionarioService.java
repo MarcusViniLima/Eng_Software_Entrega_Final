@@ -1,11 +1,16 @@
 package com.engsoftware.apifuncionario.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.engsoftware.apifuncionario.model.FuncionarioModel;
 import com.engsoftware.apifuncionario.repositorios.FuncionarioRepository;
-import com.engsoftware.apifuncionario.validate.exceptions.FuncionarioNotFoundException;
+import com.engsoftware.apifuncionario.validate.exceptions.FuncionarioAlreadySavedException;
+import com.engsoftware.apifuncionario.validate.exceptions.FuncionarioCpfNotFoundException;
+import com.engsoftware.apifuncionario.validate.exceptions.FuncionarioEmailNotFoundException;
+
 
 @Service
 public class FuncionarioService {
@@ -14,11 +19,24 @@ public class FuncionarioService {
     private FuncionarioRepository repository;
 
 	public FuncionarioModel buscarFuncionarioPorCpf(String cpf) {
-        FuncionarioModel funcionario = repository.findByCpf(cpf).orElseThrow(() -> new FuncionarioNotFoundException(cpf));
+        FuncionarioModel funcionario = repository.findByCpf(cpf).orElseThrow(() -> new FuncionarioCpfNotFoundException(cpf));
 
 		return funcionario;
 	}
+    public FuncionarioModel buscarFuncionarioPorEmail(String email) {
+        FuncionarioModel funcionario = repository.findByEmail(email).orElseThrow(() -> new FuncionarioEmailNotFoundException(email));
 
+        return funcionario;
+    }
 
+    public FuncionarioModel salvarFuncionario(FuncionarioModel funcionario) {
+        if(repository.findByCpf(funcionario.getCpf()).isPresent()) throw new FuncionarioAlreadySavedException(funcionario.getCpf());
+        if(repository.findByEmail(funcionario.getEmail()).isPresent()) throw new FuncionarioEmailNotFoundException(funcionario.getEmail());
+        return repository.save(funcionario);
+    }
+
+    public List<FuncionarioModel> buscarTodosFuncionarios() {
+        return repository.findAll();
+    }
 
 }

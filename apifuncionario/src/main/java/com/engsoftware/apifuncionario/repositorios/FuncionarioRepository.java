@@ -12,5 +12,6 @@ import com.engsoftware.apifuncionario.model.FuncionarioModel;
 public interface FuncionarioRepository extends JpaRepository<FuncionarioModel, UUID>{
 
     Optional<FuncionarioModel> findByCpf(String cpf);
+    Optional<FuncionarioModel> findByEmail(String email);
 
 }
