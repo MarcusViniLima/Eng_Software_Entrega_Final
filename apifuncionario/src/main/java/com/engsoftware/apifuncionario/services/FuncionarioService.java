@@ -31,7 +31,7 @@ public class FuncionarioService {
 
     public FuncionarioModel salvarFuncionario(FuncionarioModel funcionario) {
         if(repository.findByCpf(funcionario.getCpf()).isPresent()) throw new FuncionarioAlreadySavedException(funcionario.getCpf());
-        if(repository.findByEmail(funcionario.getEmail()).isPresent()) throw new FuncionarioEmailNotFoundException(funcionario.getEmail());
+        if(repository.findByEmail(funcionario.getEmail()).isPresent()) throw new FuncionarioAlreadySavedException(funcionario.getEmail());
         return repository.save(funcionario);
     }
 

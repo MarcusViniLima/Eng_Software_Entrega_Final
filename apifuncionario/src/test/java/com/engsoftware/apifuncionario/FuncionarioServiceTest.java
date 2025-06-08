@@ -19,6 +19,7 @@ import com.engsoftware.apifuncionario.model.FuncionarioModel;
 import com.engsoftware.apifuncionario.model.enums.Setor;
 import com.engsoftware.apifuncionario.repositorios.FuncionarioRepository;
 import com.engsoftware.apifuncionario.services.FuncionarioService;
+import com.engsoftware.apifuncionario.validate.exceptions.FuncionarioAlreadySavedException;
 import com.engsoftware.apifuncionario.validate.exceptions.FuncionarioCpfNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
@@ -101,6 +102,64 @@ public class FuncionarioServiceTest
         });
 
         verify(repository).findByEmail(emailInvalido);
+
+    }
+
+    @Test
+    void SalvarFuncionario(){
+        FuncionarioModel funcionario = new FuncionarioModel();
+        funcionario.setCpf("05460769102");
+        funcionario.setName("Teste");
+        funcionario.setEmail("XKt0q@example.com");
+        funcionario.setPassword("12345678");
+        funcionario.setSetor(Setor.TI);
+        when(repository.save(funcionario)).thenReturn(funcionario);
+
+        FuncionarioModel funcionarioEncontrado = service.salvarFuncionario(funcionario);
+
+        assertNotNull(funcionarioEncontrado);
+        assertEquals(funcionario.getId(), funcionarioEncontrado.getId());
+        assertEquals(funcionario.getCpf(), funcionarioEncontrado.getCpf());
+        assertEquals(funcionario.getName(), funcionarioEncontrado.getName());
+        assertEquals(funcionario.getEmail(), funcionarioEncontrado.getEmail());
+        assertEquals(funcionario.getPassword(), funcionarioEncontrado.getPassword());
+        assertEquals(funcionario.getSetor(), funcionarioEncontrado.getSetor());
+    }
+
+    @Test
+    void SalvarFuncionarioCpfExistente(){
+
+        FuncionarioModel funcionario = new FuncionarioModel();
+        funcionario.setCpf("05460769102");
+        funcionario.setName("Teste");
+        funcionario.setEmail("XKt0q@example.com");
+        funcionario.setPassword("12345678");
+        funcionario.setSetor(Setor.TI);
+        when(repository.findByCpf(funcionario.getCpf())).thenReturn(Optional.of(funcionario));
+
+        assertThrows(FuncionarioAlreadySavedException.class, () -> {
+            service.salvarFuncionario(funcionario);
+        });
+
+        verify(repository).findByCpf(funcionario.getCpf());
+
+    }
+
+    @Test
+    void SalvarFuncionarioEmailExistente(){
+        FuncionarioModel funcionario = new FuncionarioModel();
+        funcionario.setCpf("05460769102");
+        funcionario.setName("Teste");
+        funcionario.setEmail("XKt0q@example.com");
+        funcionario.setPassword("12345678");
+        funcionario.setSetor(Setor.TI);
+        when(repository.findByEmail(funcionario.getEmail())).thenReturn(Optional.of(funcionario));
+
+        assertThrows(FuncionarioAlreadySavedException.class, () -> {
+            service.salvarFuncionario(funcionario);
+        });
+
+        verify(repository).findByEmail(funcionario.getEmail());
 
     }
 
