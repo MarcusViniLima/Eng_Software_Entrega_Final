@@ -10,6 +10,7 @@ import com.engsoftware.apisecurity.configs.WebSecurityConfig;
 import com.engsoftware.apisecurity.dtos.AuthenticationRegister;
 import com.engsoftware.apisecurity.dtos.AuthenticationResponse;
 import com.engsoftware.apisecurity.models.UserModel;
+import com.engsoftware.apisecurity.models.enums.AcessLevels;
 import com.engsoftware.apisecurity.repositories.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -32,7 +33,8 @@ public class UserService {
             throw new Exception(String.format("Email '%s' já cadastrado", users.getEmail()));
         }
         try {
-            var user = new UserModel(users.getEmail(), users.getPassword(), users.getRole());
+            AcessLevels role = AcessLevels.valueOf(users.getAcessLevel().toUpperCase());
+            var user = new UserModel(users.getEmail(), users.getPassword(), role);
             user.setPassword(webSecurityConfig.passwordEncoder().encode(user.getPassword()));
             return userRepository.save(user);
         } catch (Exception e) {

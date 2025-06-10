@@ -2,7 +2,6 @@ package com.engsoftware.apisecurity.infra.security;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,12 +19,13 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class SecurityFilter extends OncePerRequestFilter{
 
-     @Autowired
-    private TokenService jwtService;
+    private final TokenService jwtService;
+    private final CostumerUserDetailsService costumerUserDetailsService;
 
-
-    @Autowired
-    CostumerUserDetailsService costumerUserDetailsService;
+    public SecurityFilter(TokenService jwtService, CostumerUserDetailsService costumerUserDetailsService) {
+        this.jwtService = jwtService;
+        this.costumerUserDetailsService = costumerUserDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

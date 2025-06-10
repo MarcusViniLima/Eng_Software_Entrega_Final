@@ -1,7 +1,4 @@
-package com.engsoftware.apisecurity.dtos;
-
-
-
+package com.engsoftware.apifuncionario.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthenticationRegister {
-    
+public class AuthenticationResponse {
+
     private String email;
     private String password;
     private String acessLevel;
