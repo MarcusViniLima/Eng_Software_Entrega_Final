@@ -1,5 +1,6 @@
 package com.engsoftware.apihelpdesk.models;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +29,8 @@ public class HelpdeskModel {
     private List<ComentarioModel> comentarios;
     private String emailUsername;
     private String emailReponsavelTi;
+    private LocalDate dataAbertura;
+    private LocalDate dataEncerramento;
 
 
 }
