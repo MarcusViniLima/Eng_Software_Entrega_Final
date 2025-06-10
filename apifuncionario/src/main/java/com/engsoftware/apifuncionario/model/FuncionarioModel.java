@@ -51,7 +51,7 @@ public class FuncionarioModel {
     @Enumerated(EnumType.STRING)
     private Setor setor;
 
-    private String idUser;
+    
 
 
 

@@ -11,3 +11,20 @@ eureka:
       defaultZone: http://localhost:8761/eureka    
   instance:
     instanceId: ${spring.application.name}:${application.instance_id:${random.value}}
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/ms-funcionario
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+
+debug: true
+
