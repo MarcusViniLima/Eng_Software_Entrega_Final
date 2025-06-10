@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: apigateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true # letra minúscula no nome do serviço
+      routes:
+        - id: apisecurity
+          uri: lb://security
+          predicates:
+            - Path=/auth/**
+          filters:
+            - name: AuthenticationFilter
+        - id: apifuncionario
+          uri: lb://funcionario
+          predicates:
+            - Path=/funcionario/**
+          filters:
+            - name: AuthenticationFilter
+        - id: apihelpdesk
+          uri: lb://helpdesk
+          predicates:
+            - Path=/helpdesk/**
+          filters:
+            - name: AuthenticationFilter
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    instance-id: ${spring.application.name}:${application.instance_id:${random.value}}

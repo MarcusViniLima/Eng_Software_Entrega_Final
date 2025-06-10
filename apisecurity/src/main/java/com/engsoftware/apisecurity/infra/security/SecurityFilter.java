@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class SecurityFilter extends OncePerRequestFilter{
+public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService jwtService;
     private final CostumerUserDetailsService costumerUserDetailsService;
@@ -31,9 +31,10 @@ public class SecurityFilter extends OncePerRequestFilter{
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         var token = this.recoverToken(request);
-        var subject = jwtService.validateToken(token);
+
         if (token != null) {
             try {
+                var subject = jwtService.validateToken(token); // só chama se token não for null
                 UserDetails user = costumerUserDetailsService.loadUserByUsername(subject);
                 if (user != null) {
                     var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
@@ -43,14 +44,15 @@ public class SecurityFilter extends OncePerRequestFilter{
                 System.err.println("Falha ao validar token: " + e.getMessage());
             }
         }
+
         filterChain.doFilter(request, response);
     }
 
     private String recoverToken(HttpServletRequest request) {
-        var authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader == null) {
+        var authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
         }
-        return authorizationHeader.replace("Bearer ", "");
+        return authHeader.replace("Bearer ", "");
     }
 }
