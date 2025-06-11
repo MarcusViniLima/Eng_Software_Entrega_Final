@@ -1,0 +1,122 @@
+version: "3.8"
+services:
+  # ========================
+  # INFRAESTRUTURA
+  # ========================
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - helpdesk-net
+
+  eurekaserver:
+    build: ./eurekaserver
+    ports:
+      - "8761:8761"
+    networks:
+      - helpdesk-net
+
+  apigateway:
+    build: ./apigateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eurekaserver
+    networks:
+      - helpdesk-net
+
+  # ========================
+  # BANCOS DE DADOS
+  # ========================
+  mysql-funcionario:
+    image: mysql:8.0
+    container_name: mysql-funcionario
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_funcionario
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+    networks:
+      - helpdesk-net
+    volumes:
+      - funcionario-data:/var/lib/mysql
+
+  mysql-helpdesk:
+    image: mysql:8.0
+    container_name: mysql-helpdesk
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_helpdesk
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3308:3306"
+    networks:
+      - helpdesk-net
+    volumes:
+      - helpdesk-data:/var/lib/mysql
+
+  mysql-security:
+    image: mysql:8.0
+    container_name: mysql-security
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_security
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3309:3306"
+    networks:
+      - helpdesk-net
+    volumes:
+      - security-data:/var/lib/mysql
+
+  # ========================
+  # SERVIÇOS SPRING BOOT
+  # ========================
+  apifuncionario:
+    build: ./apifuncionario
+    depends_on:
+      - mysql-funcionario
+      - eurekaserver
+      - rabbitmq
+    networks:
+      - helpdesk-net
+
+  apihelpdesk:
+    build: ./apihelpdesk
+    depends_on:
+      - mysql-helpdesk
+      - eurekaserver
+      - rabbitmq
+    volumes:
+      - ./arquivos/UploadDir:/app/arquivos
+    networks:
+      - helpdesk-net
+
+  apisecurity:
+    build: ./apisecurity
+    depends_on:
+      - mysql-security
+      - eurekaserver
+    networks:
+      - helpdesk-net
+
+volumes:
+  funcionario-data:
+  helpdesk-data:
+  security-data:
+
+networks:
+  helpdesk-net:
+    driver: bridge

@@ -22,7 +22,7 @@ eureka:
     instanceId: ${spring.application.name}:${application.instance_id:${random.value}}
 
   datasource:
-    url: jdbc:mysql://localhost:3306/ms_funcionario
+    url: jdbc:mysql://localhost:3306/ms_helpdesk
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
