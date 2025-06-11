@@ -9,7 +9,7 @@ spring:
       max-request-size: 215MB
 
 file:
-  upload-dir: /Code/UdemySpringBoot/UploadDir
+  upload-dir: D:/programacao/PROJETOS/eng_software_entrega_final/arquivos/UploadDir
 
 server:
   port: 0

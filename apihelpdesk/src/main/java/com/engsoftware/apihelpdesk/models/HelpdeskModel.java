@@ -1,16 +1,18 @@
 package com.engsoftware.apihelpdesk.models;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Queue;
 import java.util.UUID;
 
 import com.engsoftware.apihelpdesk.models.enums.Prioridade;
 import com.engsoftware.apihelpdesk.models.enums.Status;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -26,11 +28,13 @@ public class HelpdeskModel {
     private String message;
     private  Prioridade prioridade;
     private Status status;
-    private List<ComentarioModel> comentarios;
+    @OneToMany(mappedBy = "helpdesk", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Queue<ComentarioModel> comentarios;
     private String emailUsername;
     private String emailReponsavelTi;
     private LocalDate dataAbertura;
     private LocalDate dataEncerramento;
+    private String fileName;
 
 
 }

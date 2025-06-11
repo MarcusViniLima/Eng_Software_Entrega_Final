@@ -12,9 +12,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.engsoftware.apihelpdesk.configs.FileStorageConfig;
 import com.engsoftware.apihelpdesk.exception.FileStorageEcxeption;
+import com.engsoftware.apihelpdesk.models.HelpdeskModel;
 
 @Service
 public class FileStorageService {
+
+    @Autowired
+    private HelpdeskService helpdeskService;
 
 
     private final Path fileStorageLocation;
@@ -29,7 +33,7 @@ public class FileStorageService {
         }
     }
 
-    public String storeFile(MultipartFile file){
+    public String storeFile(HelpdeskModel helpdesk, MultipartFile file){
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
         try{
             if(fileName.contains("..")){
@@ -38,6 +42,8 @@ public class FileStorageService {
 
             Path targetLocation = this.fileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+            helpdesk.setFileName(fileName);
+            helpdeskService.save(helpdesk);
             return fileName;
         }catch(Exception e){
             throw new FileStorageEcxeption("Could not store file " + fileName + ". Please try again!", e);
