@@ -44,7 +44,8 @@ O projeto foi desenvolvido com **Spring Boot** e inclui recursos como:
    cd helpdesk
 
 2. **Execute com Docker Compose**
-- docker-compose up -d
+    ```bash
+    docker-compose up -d
 
 3. **Aguarde até todos os containers subirem**
 
