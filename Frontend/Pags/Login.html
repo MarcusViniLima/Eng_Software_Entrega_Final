@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelpOffice - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../CSS/Styles_Login.css">
+    <link rel="script" href="../JS/Login.js">
+</head>
+<body>
+    <div class="background">
+        <div class="stain stain-1"></div>
+        <div class="stain stain-2"></div>
+        <div class="stain stain-3"></div>
+        <div class="stain stain-4"></div>
+        <div class="stain stain-5"></div>
+    </div>
+    
+    <div class="container">
+        <div class="brand-section">
+            <div class="logo-container">
+                <div class="logo">HelpOffice</div>
+            </div>
+            <div class="slogan">Nada se perde, tudo se resolve.</div>
+        </div>
+        
+        <div class="login-card">
+            <div class="tabs">
+                <div class="tab active" data-tab="login">Login</div>
+                <div class="tab" data-tab="cadastro">Cadastro</div>
+                <div class="tab" data-tab="recuperar">Recuperar</div>
+            </div>
+            
+            <div class="tab-content">
+                <!-- Login Tab -->
+                <div id="login-tab" class="tab-pane active">
+                    <div class="welcome">
+                        <h2>Acesse sua conta</h2>
+                        <p>Bem-vindo de volta! Por favor, insira suas credenciais.</p>
+                    </div>
+                    
+                    <form>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" class="form-control" placeholder="seu@email.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Senha</label>
+                            <input type="password" id="password" class="form-control" placeholder="Sua senha">
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="remember">
+                            <label for="remember">Lembrar minha senha</label>
+                        </div>
+                        
+                        <button type="submit" class="btn">Entrar</button>
+                        
+                        <div class="forgot-password">
+                            <a href="#" class="recovery-tab">Esqueceu sua senha? Clique Aqui!</a>
+                        </div>
+                        
+                        <div class="signup-link">
+                            Não tem uma conta? <a href="#" class="signup-tab">Cadastre-se</a>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Cadastro Tab -->
+                <div id="cadastro-tab" class="tab-pane">
+                    <div class="welcome">
+                        <h2>Crie sua conta</h2>
+                        <p>Preencha os campos abaixo para criar uma conta.</p>
+                    </div>
+                    
+                    <form>
+                        <div class="form-group">
+                            <label for="name">Nome Completo</label>
+                            <input type="text" id="name" class="form-control" placeholder="Seu nome completo">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="signup-email">Email</label>
+                            <input type="email" id="signup-email" class="form-control" placeholder="seu@email.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="signup-password">Senha</label>
+                            <input type="password" id="signup-password" class="form-control" placeholder="Crie uma senha">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirm-password">Confirmar Senha</label>
+                            <input type="password" id="confirm-password" class="form-control" placeholder="Confirme sua senha">
+                        </div>
+                        
+                        <button type="submit" class="btn">Criar Conta</button>
+                        
+                        <div class="signup-link">
+                            Já tem uma conta? <a href="#" class="login-tab">Faça login</a>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Recuperar Tab -->
+                <div id="recuperar-tab" class="tab-pane">
+                    <div class="welcome">
+                        <h2>Recupere sua senha</h2>
+                        <p>Insira seu email para receber o link de recuperação.</p>
+                    </div>
+                    
+                    <form>
+                        <div class="form-group">
+                            <label for="recovery-email">Email</label>
+                            <input type="email" id="recovery-email" class="form-control" placeholder="seu@email.com">
+                        </div>
+                        
+                        <button type="submit" class="btn">Enviar Link de Recuperação</button>
+                        
+                        <div class="signup-link">
+                            Lembrou sua senha? <a href="#" class="login-tab">Faça login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+</html>
