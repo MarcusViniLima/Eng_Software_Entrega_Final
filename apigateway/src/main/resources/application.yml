@@ -3,29 +3,31 @@ spring:
     name: apigateway
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true # letra minúscula no nome do serviço
-      routes:
-        - id: apisecurity
-          uri: lb://security
-          predicates:
-            - Path=/auth/**
-          filters:
-            - name: AuthenticationFilter
-        - id: apifuncionario
-          uri: lb://funcionario
-          predicates:
-            - Path=/funcionario/**
-          filters:
-            - name: AuthenticationFilter
-        - id: apihelpdesk
-          uri: lb://helpdesk
-          predicates:
-            - Path=/helpdesk/**
-          filters:
-            - name: AuthenticationFilter
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true 
+          routes:
+            - id: apisecurity
+              uri: lb://security
+              predicates:
+                - Path=/auth/**
+              filters:
+                - name: AuthenticationFilter
+            - id: apifuncionario
+              uri: lb://funcionario
+              predicates:
+                - Path=/funcionario/**
+              filters:
+                - name: AuthenticationFilter
+            - id: apihelpdesk
+              uri: lb://helpdesk
+              predicates:
+                - Path=/helpdesk/**
+              filters:
+                - name: AuthenticationFilter
 
 eureka:
   client:

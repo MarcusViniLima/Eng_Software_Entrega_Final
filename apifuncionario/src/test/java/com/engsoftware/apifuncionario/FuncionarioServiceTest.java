@@ -3,6 +3,7 @@ package com.engsoftware.apifuncionario;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,28 +18,32 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.engsoftware.apifuncionario.model.FuncionarioModel;
 import com.engsoftware.apifuncionario.model.enums.Setor;
+import com.engsoftware.apifuncionario.producers.FuncionarioProducer;
 import com.engsoftware.apifuncionario.repositorios.FuncionarioRepository;
 import com.engsoftware.apifuncionario.services.FuncionarioService;
 import com.engsoftware.apifuncionario.validate.exceptions.FuncionarioAlreadySavedException;
 import com.engsoftware.apifuncionario.validate.exceptions.FuncionarioCpfNotFoundException;
+import com.engsoftware.apifuncionario.validate.exceptions.FuncionarioEmailNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
-public class FuncionarioServiceTest
- {
+public class FuncionarioServiceTest {
 
     @Mock
     private FuncionarioRepository repository;
+
+    @Mock
+    private FuncionarioProducer producer;
 
     @InjectMocks
     private FuncionarioService service;
 
     @Test
-    void ok() {  
+    void ok() {
     }
 
     @Test
-    void BuscarFuncionarioExistenteporCpf(){
+    void BuscarFuncionarioExistenteporCpf() {
         FuncionarioModel funcionario = new FuncionarioModel();
         funcionario.setCpf("05460769102");
         funcionario.setName("Teste");
@@ -59,7 +64,7 @@ public class FuncionarioServiceTest
     }
 
     @Test
-    void ErroBuscarFuncionarioExistenteporCpf(){
+    void ErroBuscarFuncionarioExistenteporCpf() {
         String cpfInvalido = "000.000.000-00";
         when(repository.findByCpf(cpfInvalido)).thenReturn(Optional.empty());
 
@@ -72,7 +77,7 @@ public class FuncionarioServiceTest
     }
 
     @Test
-    void BuscarFuncionarioExistenteporEmail(){
+    void BuscarFuncionarioExistenteporEmail() {
         FuncionarioModel funcionario = new FuncionarioModel();
         funcionario.setCpf("05460769102");
         funcionario.setName("Teste");
@@ -93,41 +98,41 @@ public class FuncionarioServiceTest
     }
 
     @Test
-    void ErroBuscarFuncionarioExistenteporEmail(){
+    void ErroBuscarFuncionarioExistenteporEmail() {
         String emailInvalido = "emailInvalido";
         when(repository.findByEmail(emailInvalido)).thenReturn(Optional.empty());
 
-        assertThrows(FuncionarioCpfNotFoundException.class, () -> {
+        assertThrows(FuncionarioEmailNotFoundException.class, () -> {
             service.buscarFuncionarioPorEmail(emailInvalido);
         });
 
         verify(repository).findByEmail(emailInvalido);
-
     }
 
     @Test
-    void SalvarFuncionario(){
+    void SalvarFuncionario() {
         FuncionarioModel funcionario = new FuncionarioModel();
         funcionario.setCpf("05460769102");
         funcionario.setName("Teste");
         funcionario.setEmail("XKt0q@example.com");
         funcionario.setPassword("12345678");
         funcionario.setSetor(Setor.TI);
+
+        when(repository.findByCpf(funcionario.getCpf())).thenReturn(Optional.empty());
+        when(repository.findByEmail(funcionario.getEmail())).thenReturn(Optional.empty());
         when(repository.save(funcionario)).thenReturn(funcionario);
+        doNothing().when(producer).publishMessageUser(funcionario);
 
-        FuncionarioModel funcionarioEncontrado = service.salvarFuncionario(funcionario);
+        FuncionarioModel funcionarioSalvo = service.salvarFuncionario(funcionario);
 
-        assertNotNull(funcionarioEncontrado);
-        assertEquals(funcionario.getId(), funcionarioEncontrado.getId());
-        assertEquals(funcionario.getCpf(), funcionarioEncontrado.getCpf());
-        assertEquals(funcionario.getName(), funcionarioEncontrado.getName());
-        assertEquals(funcionario.getEmail(), funcionarioEncontrado.getEmail());
-        assertEquals(funcionario.getPassword(), funcionarioEncontrado.getPassword());
-        assertEquals(funcionario.getSetor(), funcionarioEncontrado.getSetor());
+        assertNotNull(funcionarioSalvo);
+        assertEquals(funcionario.getCpf(), funcionarioSalvo.getCpf());
+        verify(producer).publishMessageUser(funcionario);
+        verify(repository).save(funcionario);
     }
 
     @Test
-    void SalvarFuncionarioCpfExistente(){
+    void SalvarFuncionarioCpfExistente() {
 
         FuncionarioModel funcionario = new FuncionarioModel();
         funcionario.setCpf("05460769102");
@@ -146,7 +151,7 @@ public class FuncionarioServiceTest
     }
 
     @Test
-    void SalvarFuncionarioEmailExistente(){
+    void SalvarFuncionarioEmailExistente() {
         FuncionarioModel funcionario = new FuncionarioModel();
         funcionario.setCpf("05460769102");
         funcionario.setName("Teste");
@@ -162,7 +167,5 @@ public class FuncionarioServiceTest
         verify(repository).findByEmail(funcionario.getEmail());
 
     }
-
-
 
 }
