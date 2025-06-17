@@ -5,8 +5,593 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HelpOffice - Sistema de Chamados</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../CSS/Styles_UserMenu.css">
-    <link rel="script" href="../JS/UserMenu.js">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #0c081d, #1a153a);
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+        }
+        
+        .brand-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .user-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        /* Main Content Styles */
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 1000px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            height: fit-content;
+        }
+        
+        .card-title {
+            font-size: 1.6rem;
+            color: #0c081d;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            color: #6a11cb;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 1rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #6a11cb;
+            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+        }
+        
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .priority-group {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .priority-option {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .priority-option:hover {
+            background: #eef2f7;
+        }
+        
+        .priority-option.active {
+            border-color: #6a11cb;
+            background: #f0e6ff;
+        }
+        
+        .priority-icon {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .high-priority .priority-icon {
+            color: #e74c3c;
+        }
+        
+        .medium-priority .priority-icon {
+            color: #f39c12;
+        }
+        
+        .low-priority .priority-icon {
+            color: #2ecc71;
+        }
+        
+        .priority-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .file-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            border: 2px dashed #e0e0e0;
+            border-radius: 10px;
+            background: #f8f9fa;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-upload:hover {
+            border-color: #6a11cb;
+            background: #f0e6ff;
+        }
+        
+        .file-upload i {
+            font-size: 2.5rem;
+            color: #6a11cb;
+            margin-bottom: 15px;
+        }
+        
+        .file-text {
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        
+        .file-info {
+            color: #6a11cb;
+            font-weight: 600;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            margin-top: 15px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #6a11cb;
+            color: #6a11cb;
+        }
+        
+        .btn-outline:hover {
+            background: #f0e6ff;
+        }
+        
+        /* Tickets Section */
+        .tickets-container {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .ticket-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            border-left: 4px solid #6a11cb;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 15px;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .ticket-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ticket-card.high {
+            border-left-color: #e74c3c;
+        }
+        
+        .ticket-card.medium {
+            border-left-color: #f39c12;
+        }
+        
+        .ticket-card.low {
+            border-left-color: #2ecc71;
+        }
+        
+        .ticket-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: #f0e6ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #6a11cb;
+        }
+        
+        .ticket-content {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .ticket-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        
+        .ticket-meta {
+            display: flex;
+            gap: 15px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .ticket-department {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+        
+        .ticket-date {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .ticket-priority {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .ticket-priority.high {
+            background: #fdecea;
+            color: #e74c3c;
+        }
+        
+        .ticket-priority.medium {
+            background: #fef5e7;
+            color: #f39c12;
+        }
+        
+        .ticket-priority.low {
+            background: #eafaf1;
+            color: #2ecc71;
+        }
+        
+        .ticket-status {
+            font-weight: 600;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .ticket-status.open {
+            background: #eaf2ff;
+            color: #2575fc;
+        }
+        
+        .ticket-status.in-progress {
+            background: #fef5e7;
+            color: #f39c12;
+        }
+        
+        .ticket-status.resolved {
+            background: #eafaf1;
+            color: #2ecc71;
+        }
+        
+        .section-divider {
+            font-size: 1.4rem;
+            color: #0c081d;
+            margin: 30px 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: #f0f2f5;
+            margin-left: 10px;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+            font-size: 0.9rem;
+            border-top: 1px solid #f0f2f5;
+            margin-top: 50px;
+        }
+        
+        .slogan {
+            font-style: italic;
+            color: #6a11cb;
+            font-weight: 500;
+            margin-top: 10px;
+            font-size: 1.1rem;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 80%;
+            max-width: 800px;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 30px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+        
+        .close-modal:hover {
+            color: #333;
+        }
+        
+        .modal-header {
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f2f5;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.8rem;
+            color: #0c081d;
+            margin-bottom: 10px;
+        }
+        
+        .ticket-info {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .ticket-id {
+            background: #eaf2ff;
+            color: #2575fc;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .ticket-details {
+            margin-bottom: 30px;
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .detail-item strong {
+            color: #495057;
+            min-width: 100px;
+        }
+        
+        .detail-item p {
+            line-height: 1.6;
+        }
+        
+        .ticket-history {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .history-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .history-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .history-author {
+            font-weight: 600;
+            color: #0c081d;
+            margin-bottom: 5px;
+        }
+        
+        .history-content {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+        
+        .history-time {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-align: right;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f2f5;
+        }
+        
+        .attachments {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .attachment {
+            padding: 8px 15px;
+            background: #f0e6ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .attachment i {
+            color: #6a11cb;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .chat-input textarea {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .modal-footer {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .chat-input {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Header Section -->
@@ -20,17 +605,6 @@
             <div class="user-name">João Silva</div>
         </div>
     </header>
-    
-    <!-- Banner Section -->
-    <section class="banner">
-        <div class="banner-content">
-            <h1 class="banner-title">Central de Suporte HelpOffice</h1>
-            <p class="banner-description">Sistema de gerenciamento de chamados para solução rápida e eficiente de problemas técnicos e suporte.</p>
-            <button class="btn">Relatar um Problema</button>
-        </div>
-        <div class="banner-logo">HelpOffice</div>
-    </section>
-    
     
     <!-- Main Content -->
     <div class="container">
@@ -99,7 +673,7 @@
             <h2 class="card-title"><i class="fas fa-ticket-alt"></i> Meus Chamados</h2>
             
             <div class="tickets-container">
-                <div class="ticket-card high">
+                <div class="ticket-card high" data-ticket="1024">
                     <div class="ticket-icon"><i class="fas fa-wifi"></i></div>
                     <div class="ticket-content">
                         <div class="ticket-title">Wi-Fi do Financeiro está lento</div>
@@ -111,7 +685,7 @@
                     <div class="ticket-priority high">Alta Prioridade</div>
                 </div>
                 
-                <div class="ticket-card high">
+                <div class="ticket-card high" data-ticket="1025">
                     <div class="ticket-icon"><i class="fas fa-print"></i></div>
                     <div class="ticket-content">
                         <div class="ticket-title">Problema com impressora no setor RH</div>
@@ -125,7 +699,7 @@
                 
                 <h3 class="section-divider">Chamados Anteriores</h3>
                 
-                <div class="ticket-card medium">
+                <div class="ticket-card medium" data-ticket="1023">
                     <div class="ticket-icon"><i class="fas fa-laptop"></i></div>
                     <div class="ticket-content">
                         <div class="ticket-title">Computador não liga</div>
@@ -137,7 +711,7 @@
                     <div class="ticket-priority medium">Média Prioridade</div>
                 </div>
                 
-                <div class="ticket-card low">
+                <div class="ticket-card low" data-ticket="1022">
                     <div class="ticket-icon"><i class="fas fa-file-invoice-dollar"></i></div>
                     <div class="ticket-content">
                         <div class="ticket-title">Software de folha de pagamento lento</div>
@@ -149,7 +723,7 @@
                     <div class="ticket-status resolved">Resolvido</div>
                 </div>
                 
-                <div class="ticket-card low">
+                <div class="ticket-card low" data-ticket="1021">
                     <div class="ticket-icon"><i class="fas fa-keyboard"></i></div>
                     <div class="ticket-content">
                         <div class="ticket-title">Teclado não funciona</div>
@@ -164,11 +738,192 @@
         </div>
     </div>
     
+    <!-- Ticket Modal -->
+    <div id="ticket-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            
+            <div class="modal-header">
+                <h2 id="modal-title">Wi-Fi do Financeiro está lento</h2>
+                <div class="ticket-info">
+                    <span class="ticket-id" id="modal-id">#1024</span>
+                    <span class="ticket-priority high" id="modal-priority">Alta Prioridade</span>
+                    <span class="ticket-status open" id="modal-status">Aberto</span>
+                </div>
+            </div>
+            
+            <div class="ticket-details">
+                <div class="detail-item">
+                    <strong>Departamento:</strong>
+                    <span id="modal-department">TI</span>
+                </div>
+                
+                <div class="detail-item">
+                    <strong>Aberto por:</strong>
+                    <span id="modal-author">João Dias (RH)</span>
+                </div>
+                
+                <div class="detail-item">
+                    <strong>Data:</strong>
+                    <span id="modal-date">02/06/2025</span>
+                </div>
+                
+                <div class="detail-item">
+                    <strong>Descrição:</strong>
+                    <p id="modal-description">Desde ontem à tarde, a conexão Wi-Fi no setor financeiro está extremamente lenta, dificultando o acesso aos sistemas. Vários computadores apresentam o mesmo problema. Já tentei reiniciar o roteador, mas o problema persiste.</p>
+                </div>
+                
+                <div class="detail-item">
+                    <strong>Anexos:</strong>
+                    <div class="attachments" id="modal-attachments">
+                        <div class="attachment">
+                            <i class="fas fa-file-image"></i>
+                            <span>velocidade-teste.png</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ticket-history">
+                <h3>Histórico do Chamado</h3>
+                
+                <div class="history-item">
+                    <div class="history-author">João Dias (RH)</div>
+                    <div class="history-content">Chamado aberto: Wi-Fi do Financeiro está lento</div>
+                    <div class="history-time">02/06/2025 09:15</div>
+                </div>
+                
+                <div class="history-item">
+                    <div class="history-author">Ana Silva (Técnico TI)</div>
+                    <div class="history-content">Atribuído para mim. Vou verificar o roteador do setor financeiro. Por favor, informe se todos os computadores estão com problema ou apenas alguns.</div>
+                    <div class="history-time">02/06/2025 10:30</div>
+                </div>
+                
+                <div class="history-item">
+                    <div class="history-author">João Dias (RH)</div>
+                    <div class="history-content">Segundo a equipe do financeiro, todos os computadores estão com o mesmo problema de lentidão.</div>
+                    <div class="history-time">02/06/2025 11:05</div>
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <textarea placeholder="Digite sua mensagem para o técnico..."></textarea>
+                <button class="btn">Enviar</button>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline">Fechar Chamado</button>
+                <button class="btn">Adicionar Comentário</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Footer -->
     <footer class="footer">
         <div>&copy; 2025 HelpOffice - Todos os direitos reservados</div>
         <div class="slogan">Nada se perde, tudo se resolve.</div>
     </footer>
     
+    <script>
+        // Função para abrir o modal com os dados do chamado
+        function openTicketModal(ticketId) {
+            const modal = document.getElementById('ticket-modal');
+            
+            // Aqui normalmente você buscaria os dados do chamado em um banco de dados
+            // Para este exemplo, vamos definir manualmente os dados com base no ID
+            if (ticketId === '1024') {
+                document.getElementById('modal-title').textContent = 'Wi-Fi do Financeiro está lento';
+                document.getElementById('modal-id').textContent = '#1024';
+                document.getElementById('modal-department').textContent = 'TI';
+                document.getElementById('modal-author').textContent = 'João Dias (RH)';
+                document.getElementById('modal-date').textContent = '02/06/2025';
+                document.getElementById('modal-description').textContent = 'Desde ontem à tarde, a conexão Wi-Fi no setor financeiro está extremamente lenta, dificultando o acesso aos sistemas. Vários computadores apresentam o mesmo problema. Já tentei reiniciar o roteador, mas o problema persiste.';
+                document.getElementById('modal-priority').textContent = 'Alta Prioridade';
+                document.getElementById('modal-status').textContent = 'Aberto';
+                document.getElementById('modal-status').className = 'ticket-status open';
+            } else if (ticketId === '1025') {
+                document.getElementById('modal-title').textContent = 'Problema com impressora no setor RH';
+                document.getElementById('modal-id').textContent = '#1025';
+                document.getElementById('modal-department').textContent = 'RH';
+                document.getElementById('modal-author').textContent = 'Maria Oliveira (RH)';
+                document.getElementById('modal-date').textContent = '02/06/2025';
+                document.getElementById('modal-description').textContent = 'A impressora do setor de RH parou de funcionar repentinamente. Já verifiquei as conexões e o papel, mas o problema persiste. Mensagem de erro: "Falha de comunicação".';
+                document.getElementById('modal-priority').textContent = 'Alta Prioridade';
+                document.getElementById('modal-status').textContent = 'Em andamento';
+                document.getElementById('modal-status').className = 'ticket-status in-progress';
+            } else if (ticketId === '1023') {
+                document.getElementById('modal-title').textContent = 'Computador não liga';
+                document.getElementById('modal-id').textContent = '#1023';
+                document.getElementById('modal-department').textContent = 'TI';
+                document.getElementById('modal-author').textContent = 'Carlos Santos (Marketing)';
+                document.getElementById('modal-date').textContent = '01/06/2025';
+                document.getElementById('modal-description').textContent = 'O computador da estação 3 no setor de Marketing não liga. Ao pressionar o botão power, nenhuma luz acende. Já verifiquei a tomada e o cabo de energia.';
+                document.getElementById('modal-priority').textContent = 'Média Prioridade';
+                document.getElementById('modal-status').textContent = 'Resolvido';
+                document.getElementById('modal-status').className = 'ticket-status resolved';
+            }
+            
+            modal.style.display = 'block';
+        }
+        
+        // Fechar modal quando clicar no X
+        document.querySelector('.close-modal').addEventListener('click', function() {
+            document.getElementById('ticket-modal').style.display = 'none';
+        });
+        
+        // Fechar modal quando clicar fora da área de conteúdo
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('ticket-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+        
+        // Adicionar evento de clique aos tickets
+        document.querySelectorAll('.ticket-card').forEach(ticket => {
+            ticket.addEventListener('click', function() {
+                const ticketId = this.getAttribute('data-ticket');
+                openTicketModal(ticketId);
+            });
+        });
+        
+        // Seleção de prioridade
+        document.querySelectorAll('.priority-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Remover classe ativa de todos
+                document.querySelectorAll('.priority-option').forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                
+                // Adicionar classe ativa ao selecionado
+                this.classList.add('active');
+                
+                // Atualizar campo oculto
+                document.getElementById('priority').value = this.getAttribute('data-priority');
+            });
+        });
+        
+        // Simulação de upload de arquivo
+        document.getElementById('file-upload').addEventListener('click', function() {
+            document.getElementById('file-input').click();
+        });
+        
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                document.querySelector('.file-info').textContent = this.files[0].name;
+            }
+        });
+        
+        // Prevenir envio do formulário para demonstração
+        document.getElementById('ticket-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Chamado aberto com sucesso!');
+            this.reset();
+            document.querySelectorAll('.priority-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            document.querySelector('.file-info').textContent = 'Nenhum arquivo selecionado';
+        });
+    </script>
 </body>
 </html>

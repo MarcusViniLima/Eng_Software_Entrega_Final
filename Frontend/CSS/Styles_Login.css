@@ -1,4 +1,4 @@
-        * {
+       * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -13,6 +13,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
+            padding: 20px;
         }
         
         .background {
@@ -39,7 +40,6 @@
             background: linear-gradient(135deg, #ff9a9e, #fad0c4);
             top: 10%;
             left: 10%;
-            animation: float 15s infinite ease-in-out;
         }
         
         .stain-2 {
@@ -48,7 +48,6 @@
             background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
             top: 60%;
             left: 5%;
-            animation: float 18s infinite ease-in-out;
         }
         
         .stain-3 {
@@ -57,7 +56,6 @@
             background: linear-gradient(135deg, #d4fc79, #96e6a1);
             top: 25%;
             right: 10%;
-            animation: float 16s infinite ease-in-out;
         }
         
         .stain-4 {
@@ -66,7 +64,6 @@
             background: linear-gradient(135deg, #f6d365, #fda085);
             bottom: 5%;
             right: 8%;
-            animation: float 20s infinite ease-in-out;
         }
         
         .stain-5 {
@@ -75,18 +72,17 @@
             background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
             bottom: 25%;
             left: 30%;
-            animation: float 14s infinite ease-in-out;
         }
         
         .container {
             position: relative;
             z-index: 10;
-            width: 90%;
-            max-width: 1200px;
+            width: 100%;
+            max-width: 1000px;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            min-height: 100%;
         }
         
         .brand-section {
@@ -95,67 +91,72 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px;
+            padding: 20px;
             text-align: center;
             color: white;
+            margin-right: 20px;
         }
         
+        /* CÍRCULO PRINCIPAL - TAMANHO OTIMIZADO */
         .logo-container {
-            width: 220px;
-            height: 220px;
+            width: 600px;
+            height: 600px;
             border-radius: 50%;
-            background: rgba(12, 8, 29, 0.9); /* Cor sólida do fundo */
+            background: rgba(12, 8, 29, 0.9);
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.15);
         }
         
         .logo {
-            font-size: 2.5rem;
+            font-size: 5rem;
             font-weight: 700;
             font-family: 'Arial Rounded MT Bold', 'Segoe UI', sans-serif;
             text-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             letter-spacing: -1px;
             color: white;
             line-height: 1.2;
-            padding: 0 15px;
+            padding: 0 10px;
         }
         
         .slogan {
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 400;
             font-style: italic;
             font-family: 'Georgia', serif;
             max-width: 500px;
             line-height: 1.4;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            margin-bottom: 40px;
             opacity: 0.9;
         }
         
         .login-card {
             flex: 1;
-            max-width: 500px;
+            max-width: 480px;
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             overflow: hidden;
             z-index: 10;
             margin: 20px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
         }
         
         .tabs {
             display: flex;
             background: #f8f9fa;
             border-bottom: 1px solid #e0e0e0;
+            flex-shrink: 0;
         }
         
         .tab {
             flex: 1;
-            padding: 20px 10px;
+            padding: 18px 10px;
             text-align: center;
             font-weight: 600;
             font-size: 1.1rem;
@@ -164,6 +165,10 @@
             color: #6c757d;
             position: relative;
             overflow: hidden;
+        }
+        
+        .tab:hover {
+            background: #eef2f7;
         }
         
         .tab.active {
@@ -175,36 +180,37 @@
             content: '';
             position: absolute;
             bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
+            left: 0;
+            width: 100%;
             height: 3px;
             background: #0e0b20;
-            border-radius: 3px;
         }
         
         .tab-content {
-            padding: 40px;
+            padding: 30px;
+            overflow-y: auto;
+            flex-grow: 1;
         }
         
         .welcome {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             text-align: center;
         }
         
         .welcome h2 {
-            font-size: 1.8rem;
+            font-size: 1.7rem;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .welcome p {
             color: #6c757d;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
         
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            position: relative;
         }
         
         .form-group label {
@@ -212,16 +218,17 @@
             margin-bottom: 8px;
             font-weight: 600;
             color: #495057;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
         }
         
         .form-control {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
+            padding-left: 45px;
             border: 1px solid #ced4da;
             border-radius: 10px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
+            font-size: 0.95rem;
+            transition: all 0.3s;
         }
         
         .form-control:focus {
@@ -230,10 +237,18 @@
             box-shadow: 0 0 0 3px rgba(14, 11, 32, 0.1);
         }
         
+        .form-icon {
+            position: absolute;
+            left: 15px;
+            top: 40px;
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        
         .checkbox-group {
             display: flex;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
         .checkbox-group input {
@@ -241,63 +256,47 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
+            accent-color: #0e0b20;
         }
         
         .checkbox-group label {
             color: #495057;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             cursor: pointer;
         }
         
         .btn {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
             border: none;
             border-radius: 10px;
-            background: #0e0b20;
+            background: linear-gradient(135deg, #0e0b20, #1a153a);
             color: white;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .btn:hover {
-            background: #1a153a;
+            background: linear-gradient(135deg, #1a153a, #0e0b20);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
-        .forgot-password {
-            text-align: center;
-            margin-top: 20px;
-        }
-        
-        .forgot-password a {
-            color: #0e0b20;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: color 0.3s;
-        }
-        
-        .forgot-password a:hover {
-            color: #1a153a;
-            text-decoration: underline;
-        }
-        
         .signup-link {
             text-align: center;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             color: #495057;
-            margin-top: 20px;
+            margin-top: 15px;
         }
         
         .signup-link a {
             color: #0e0b20;
             text-decoration: none;
             font-weight: 600;
+            position: relative;
         }
         
         .signup-link a:hover {
@@ -306,54 +305,87 @@
         
         .tab-pane {
             display: none;
+            animation: fadeIn 0.4s ease forwards;
         }
         
         .tab-pane.active {
             display: block;
-            animation: fadeIn 0.5s ease;
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
-        @keyframes float {
-            0%, 100% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-            25% {
-                transform: translate(5px, 10px) rotate(2deg);
-            }
-            50% {
-                transform: translate(-5px, -10px) rotate(-2deg);
-            }
-            75% {
-                transform: translate(8px, -5px) rotate(3deg);
-            }
-        }
-        
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
             .container {
                 flex-direction: column;
-                padding: 20px;
             }
             
             .brand-section {
-                padding: 20px;
+                margin-right: 0;
                 margin-bottom: 20px;
             }
             
             .logo-container {
-                width: 200px;
-                height: 200px;
+                width: 220px;
+                height: 220px;
             }
             
             .logo {
-                font-size: 2.2rem;
+                font-size: 2.4rem;
             }
             
             .slogan {
-                font-size: 1.4rem;
+                font-size: 1.6rem;
+            }
+            
+            .login-card {
+                width: 100%;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .logo-container {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .logo {
+                font-size: 1.8rem;
+            }
+            
+            .slogan {
+                font-size: 1.2rem;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+            
+            .welcome h2 {
+                font-size: 1.5rem;
+            }
+            
+            .form-control {
+                padding: 12px;
+                padding-left: 40px;
+            }
+            
+            .form-icon {
+                top: 37px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-height: 700px) {
+            .brand-section {
+                display: none;
+            }
+            
+            .login-card {
+                max-height: 95vh;
             }
         }
