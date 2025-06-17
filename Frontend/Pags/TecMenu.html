@@ -22,7 +22,7 @@
             <div class="user-avatar">AS</div>
             <div class="user-name">Ana Silva - Técnico TI</div>
                 <a href="../Pags/Relatorio.html" class="report-btn">Relatório</a>
-    </div>
+        </div>
     </header>
     
     <!-- Main Content -->
@@ -160,16 +160,20 @@
                             <td><span class="priority-badge priority-high">Alta</span></td>
                             <td><span class="status-badge status-progress">Em Andamento</span></td>
                             <td>
-                                <div>
-                                    <span>Ana Silva</span>
-                                    
+                                <div class="tech-info">
+                                    <span class="tech-badge"><i class="fas fa-user"></i> Ana Silva</span>
                                 </div>
                             </td>
                             <td>02/06/2025</td>
                             <td>
-                                <button class="action-btn view-btn" title="Visualizar" data-id="1025">
-                                    <i class="fas fa-eye"></i>
-                                </button>
+                                <div class="actions-container">
+                                    <button class="action-btn assign-btn" title="Atribuir técnico" data-id="1025">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="action-btn view-btn" title="Visualizar" data-id="1025">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         <tr>
@@ -178,12 +182,21 @@
                             <td>TI</td>
                             <td><span class="priority-badge priority-high">Alta</span></td>
                             <td><span class="status-badge status-open">Aberto</span></td>
-                            <td>-</td>
+                            <td>
+                                <div class="tech-info">
+                                    <span class="tech-badge"><i class="fas fa-plus-circle"></i> Sem técnico</span>
+                                </div>
+                            </td>
                             <td>02/06/2025</td>
                             <td>
-                                <button class="action-btn view-btn" title="Visualizar" data-id="1024">
-                                    <i class="fas fa-eye"></i>
-                                </button>
+                                <div class="actions-container">
+                                    <button class="action-btn assign-btn" title="Atribuir técnico" data-id="1024">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="action-btn view-btn" title="Visualizar" data-id="1024">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         <tr>
@@ -193,16 +206,20 @@
                             <td><span class="priority-badge priority-high">Alta</span></td>
                             <td><span class="status-badge status-resolved">Resolvido</span></td>
                             <td>
-                                <div>
-                                    <span>Carlos Oliveira</span>
-                                  
+                                <div class="tech-info">
+                                    <span class="tech-badge"><i class="fas fa-user"></i> Carlos Oliveira</span>
                                 </div>
                             </td>
                             <td>01/06/2025</td>
                             <td>
-                                <button class="action-btn view-btn" title="Visualizar" data-id="1022">
-                                    <i class="fas fa-eye"></i>
-                                </button>
+                                <div class="actions-container">
+                                    <button class="action-btn assign-btn" title="Atribuir técnico" data-id="1022">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="action-btn view-btn" title="Visualizar" data-id="1022">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         <tr>
@@ -212,16 +229,20 @@
                             <td><span class="priority-badge priority-low">Baixa</span></td>
                             <td><span class="status-badge status-resolved">Resolvido</span></td>
                             <td>
-                                <div>
-                                    <span>Pedro Santos</span>
-                                
+                                <div class="tech-info">
+                                    <span class="tech-badge"><i class="fas fa-user"></i> Pedro Santos</span>
                                 </div>
                             </td>
                             <td>31/05/2025</td>
                             <td>
-                                <button class="action-btn view-btn" title="Visualizar" data-id="1019">
-                                    <i class="fas fa-eye"></i>
-                                </button>
+                                <div class="actions-container">
+                                    <button class="action-btn assign-btn" title="Atribuir técnico" data-id="1019">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="action-btn view-btn" title="Visualizar" data-id="1019">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -340,10 +361,35 @@
         </div>
     </div>
     
+    <!-- Modal de Atribuição de Técnico -->
+    <div class="assign-modal" id="assign-modal">
+        <div class="assign-content">
+            <div class="assign-header">
+                <h3 class="assign-title">Atribuir Técnico</h3>
+                <button class="close-assign">&times;</button>
+            </div>
+            <div class="assign-form">
+                <p>Selecione o técnico para o chamado <strong id="assign-ticket-id">#1024</strong></p>
+                <select class="assign-select" id="assign-technician">
+                    <option value="">- Selecionar -</option>
+                    <option value="as">Ana Silva</option>
+                    <option value="co">Carlos Oliveira</option>
+                    <option value="ps">Pedro Santos</option>
+                </select>
+            </div>
+            <div class="assign-actions">
+                <button class="assign-btn-cancel" id="assign-cancel">Cancelar</button>
+                <button class="assign-btn-confirm" id="assign-confirm">Atribuir</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Footer -->
     <footer class="footer">
         <div>&copy; 2025 HelpOffice - Todos os direitos reservados</div>
         <div class="slogan">Nada se perde, tudo se resolve.</div>
     </footer>
+    
+    
 </body>
 </html>

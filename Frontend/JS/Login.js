@@ -1,4 +1,4 @@
-       // Tab switching functionality
+        // Tab switching functionality
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 // Remove active class from all tabs

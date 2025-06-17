@@ -1,4 +1,3 @@
-        /* Estilos existentes (mantidos para contexto) */
         * {
             margin: 0;
             padding: 0;
@@ -756,4 +755,169 @@
                 margin-top: 5px;
                 margin-left: 0;
             }
+        }
+        
+        /* Estilos para os botões na coluna de ações */
+        .actions-container {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-start;
+        }
+        
+        .assign-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .assign-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .assign-btn i {
+            transition: transform 0.3s;
+        }
+        
+        .assign-btn:hover i {
+            transform: rotate(90deg);
+        }
+        
+        .tech-name {
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .assign-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Modal de atribuição de técnico */
+        .assign-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .assign-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .assign-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            width: 350px;
+            max-width: 90%;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: all 0.3s;
+        }
+        
+        .assign-modal.active .assign-content {
+            transform: translateY(0);
+        }
+        
+        .assign-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .assign-title {
+            font-size: 1.4rem;
+            color: var(--dark);
+        }
+        
+        .close-assign {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .assign-form {
+            margin-bottom: 20px;
+        }
+        
+        .assign-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        
+        .assign-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .assign-btn-confirm {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .assign-btn-cancel {
+            padding: 10px 20px;
+            background: var(--light-gray);
+            color: var(--gray);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        /* Melhorias na coluna Técnico */
+        .tech-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tech-badge {
+            background: #f0e6ff;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .tech-badge i {
+            color: var(--primary);
         }
