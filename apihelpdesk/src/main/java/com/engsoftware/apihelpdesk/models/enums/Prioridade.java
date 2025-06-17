@@ -2,16 +2,24 @@ package com.engsoftware.apihelpdesk.models.enums;
 
 public enum Prioridade {
 
-    ALTA ("Alta"), MEDIA ("Média"), BAIXA ("Baixa");
+    ALTA("Alta", 2),
+    MEDIA("Média", 1),
+    BAIXA("Baixa", 0);
 
-    private String prioridade;
+    private final String descricao;
+    private final int peso;
 
-    Prioridade(String prioridade) {
-        this.prioridade = prioridade;
+    Prioridade(String descricao, int peso) {
+        this.descricao = descricao;
+        this.peso = peso;
     }
 
-    public String getPrioridade() {
-        return prioridade;
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public int getPeso() {
+        return peso;
     }
 
 }
