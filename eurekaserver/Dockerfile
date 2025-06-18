@@ -1,12 +1,14 @@
-# Etapa de build
-FROM maven:3.9.6-eclipse-temurin-21 AS build
+FROM maven:3.9.6-eclipse-temurin-21 as builder
 WORKDIR /app
-COPY . .
+COPY pom.xml .
+COPY src src
+RUN mvn dependency:go-offline
 RUN mvn clean package -DskipTests
 
-# Etapa de runtime
-FROM eclipse-temurin:21-jdk
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
+COPY --from=builder /app/target/*.jar app.jar
+
+EXPOSE 8761
+
 ENTRYPOINT ["java", "-jar", "app.jar"]

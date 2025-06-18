@@ -3,31 +3,34 @@ spring:
     name: apigateway
   cloud:
     gateway:
-      server:
-        webflux:
-          discovery:
-            locator:
-              enabled: true
-              lower-case-service-id: true 
-          routes:
-            - id: apisecurity
-              uri: lb://security
-              predicates:
-                - Path=/auth/**
-              filters:
-                - name: AuthenticationFilter
-            - id: apifuncionario
-              uri: lb://funcionario
-              predicates:
-                - Path=/funcionario/**
-              filters:
-                - name: AuthenticationFilter
-            - id: apihelpdesk
-              uri: lb://helpdesk
-              predicates:
-                - Path=/helpdesk/**
-              filters:
-                - name: AuthenticationFilter
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # Rota para API de Funcionário
+        - id: apifuncionario
+          uri: lb://apifuncionario
+          predicates:
+            - Path=/funcionario/**
+        
+        # Rota para API de Segurança
+        - id: apisecurity
+          uri: lb://apisecurity
+          predicates:
+            - Path=/auth/**
+        
+        # Rota para API de HelpDesk
+        - id: apihelpdesk
+          uri: lb://apihelpdesk
+          predicates:
+            - Path=/helpdesk/**
+        
+        # Nova Rota para API de Email
+        - id: apiemail
+          uri: lb://apiemail  # Nome EXATO registrado no Eureka
+          predicates:
+            - Path=/email/**
 
 eureka:
   client:
@@ -39,4 +42,4 @@ eureka:
 api:
   security:
     token:
-      secret: cb9d04a187ec5b9d9e73af07cb02d13a2c6a24b03469dfb8dad96f84bed1898d
+      secret: cb9404a187ec5b9d9e73af07cb02d13a2c6a24b03469dfb8dad96f84bed1898d

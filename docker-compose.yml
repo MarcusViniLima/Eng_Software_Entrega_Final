@@ -1,121 +1,188 @@
-services:
-  # ========================
-  # INFRAESTRUTURA
-  # ========================
-  rabbitmq:
-    image: rabbitmq:3-managementS
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    networks:
-      - helpdesk-net
+version: '3.8'
 
-  eurekaserver:
-    build: ./eurekaserver
+services:
+  # Service Discovery
+  eureka-server:
+    image: springcloud/eureka
+    container_name: eureka-server
     ports:
       - "8761:8761"
     networks:
-      - helpdesk-net
+      - app-network
 
-  apigateway:
-    build: ./apigateway
-    ports:
-      - "8080:8080"
-    depends_on:
-      - eurekaserver
-    networks:
-      - helpdesk-net
-
-  # ========================
-  # BANCOS DE DADOS
-  # ========================
+  # Databases - Um para cada serviço
   mysql-funcionario:
     image: mysql:8.0
     container_name: mysql-funcionario
-    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: ms_funcionario
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
     ports:
-      - "3307:3306"
-    networks:
-      - helpdesk-net
+      - "3306:3306"
     volumes:
-      - funcionario-data:/var/lib/mysql
+      - mysql_funcionario_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 20s
+      retries: 10
+    networks:
+      - app-network
 
   mysql-helpdesk:
     image: mysql:8.0
     container_name: mysql-helpdesk
-    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: ms_helpdesk
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
     ports:
-      - "3308:3306"
-    networks:
-      - helpdesk-net
+      - "3307:3306"
     volumes:
-      - helpdesk-data:/var/lib/mysql
+      - mysql_helpdesk_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+    networks:
+      - app-network
 
   mysql-security:
     image: mysql:8.0
     container_name: mysql-security
-    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: ms_security
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_security_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+    networks:
+      - app-network
+
+  mysql-email:
+    image: mysql:8.0
+    container_name: mysql-email
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: ms_email
     ports:
       - "3309:3306"
-    networks:
-      - helpdesk-net
     volumes:
-      - security-data:/var/lib/mysql
+      - mysql_email_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+    networks:
+      - app-network
 
-  # ========================
-  # SERVIÇOS SPRING BOOT
-  # ========================
-  apifuncionario:
-    build: ./apifuncionario
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      API_SECURITY_TOKEN_SECRET: cb9404a187ec5b9d9e73af07cb02d13a2c6a24b03469dfb8dad96f84bed1898d
+    depends_on:
+      - eureka-server
+    networks:
+      - app-network
+
+  # API Funcionario
+  api-funcionario:
+    build:
+      context: ./api-funcionario
+    container_name: api-funcionario
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-funcionario:3306/ms_funcionario
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
     depends_on:
       - mysql-funcionario
-      - eurekaserver
-      - rabbitmq
+      - eureka-server
     networks:
-      - helpdesk-net
+      - app-network
 
-  apihelpdesk:
-    build: ./apihelpdesk
+  # API HelpDesk
+  api-helpdesk:
+    build:
+      context: ./api-helpdesk
+    container_name: api-helpdesk
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-helpdesk:3306/ms_helpdesk
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      FILE_UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
     depends_on:
       - mysql-helpdesk
-      - eurekaserver
-      - rabbitmq
-    volumes:
-      - ./arquivos/UploadDir:/app/arquivos
+      - eureka-server
     networks:
-      - helpdesk-net
+      - app-network
 
-  apisecurity:
-    build: ./apisecurity
+  # API Security
+  api-security:
+    build:
+      context: ./api-security
+    container_name: api-security
+    ports:
+      - "8083:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-security:3306/ms_security
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      API_SECURITY_TOKEN_SECRET: cb9d04a187ec5b9d9e73af07cb02d13a2c6a24b03469dfb8dad96f84bed1898d
     depends_on:
       - mysql-security
-      - eurekaserver
+      - eureka-server
     networks:
-      - helpdesk-net
+      - app-network
 
+  # API Email
+  api-email:
+    build:
+      context: ./api-email
+    container_name: api-email
+    ports:
+      - "8084:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-email:3306/ms_email
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: seu-email@gmail.com
+      SPRING_MAIL_PASSWORD: sua-senha
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+    depends_on:
+      - mysql-email
+      - eureka-server
+    networks:
+      - app-network
+
+# Volumes para persistência de dados
 volumes:
-  funcionario-data:
-  helpdesk-data:
-  security-data:
+  mysql_funcionario_data:
+  mysql_helpdesk_data:
+  mysql_security_data:
+  mysql_email_data:
+  uploads:
 
+# Rede para comunicação entre serviços
 networks:
-  helpdesk-net:
+  app-network:
     driver: bridge
