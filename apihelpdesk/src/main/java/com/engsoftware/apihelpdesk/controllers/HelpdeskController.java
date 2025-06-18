@@ -2,11 +2,14 @@ package com.engsoftware.apihelpdesk.controllers;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -28,7 +31,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.engsoftware.apihelpdesk.exception.FileNotFoundException;
 import com.engsoftware.apihelpdesk.models.ComentarioModel;
 import com.engsoftware.apihelpdesk.models.HelpdeskModel;
+import com.engsoftware.apihelpdesk.models.enums.Setor;
 import com.engsoftware.apihelpdesk.models.enums.Status;
+import com.engsoftware.apihelpdesk.respositories.HelpdeskRepository;
 import com.engsoftware.apihelpdesk.services.ComentarioService;
 import com.engsoftware.apihelpdesk.services.FileStorageService;
 import com.engsoftware.apihelpdesk.services.HelpdeskService;
@@ -43,6 +48,8 @@ public class HelpdeskController {
     private ComentarioService comentarioService;
     @Autowired
     private FileStorageService fileStorageService;
+    @Autowired
+    private HelpdeskRepository helpdeskRepository;
 
     @GetMapping
     public List<HelpdeskModel> findAll() {
@@ -159,5 +166,78 @@ public class HelpdeskController {
     @PutMapping("/{id}/cancelar")
     public HelpdeskModel cancelarChamado(@PathVariable UUID id) {
         return helpdeskService.cancelarChamado(id);
+    }
+
+    @GetMapping("/status-por-departamento")
+    public Map<String, Long> getStatusPorDepartamento(@RequestParam Setor setor) {
+        Map<String, Long> status = new HashMap<>();
+        status.put("abertos", helpdeskRepository.countBySetorAndStatus(setor, Status.ABERTO));
+        status.put("em_andamento", helpdeskRepository.countBySetorAndStatus(setor, Status.EM_ANDAMENTO));
+        status.put("resolvidos", helpdeskRepository.countBySetorAndStatus(setor, Status.RESOLVIDO));
+        status.put("atrasados", helpdeskRepository.countBySetorAndStatus(setor, Status.ATRASO));
+        return status;
+    }
+
+    @GetMapping("/contagem/tecnico")
+    public Map<String, Long> getContagemChamadosPorTecnico(@RequestParam String period) {
+        Map<String, Long> contagem = new HashMap<>();
+
+        // Implementar lógica para agrupar por técnico no período
+        List<HelpdeskModel> chamados = filterByPeriod(helpdeskRepository.findAll(), period);
+
+        chamados.stream()
+                .filter(c -> c.getEmailResponsavelTI() != null)
+                .collect(Collectors.groupingBy(
+                        HelpdeskModel::getEmailResponsavelTI,
+                        Collectors.counting()))
+                .forEach(contagem::put);
+
+        return contagem;
+    }
+
+    @GetMapping("/tempo-resolucao")
+    public Map<String, Double> getTempoMedioResolucao(@RequestParam String period) {
+        Map<String, Double> tempos = new HashMap<>();
+
+        // Implementar lógica para calcular tempos médios
+        List<HelpdeskModel> chamados = filterByPeriod(
+                helpdeskRepository.findByStatus(Status.RESOLVIDO),
+                period);
+
+        // Por departamento
+        chamados.stream()
+                .collect(Collectors.groupingBy(
+                        HelpdeskModel::getSetor,
+                        Collectors.averagingDouble(c -> Duration.between(
+                                c.getDataAbertura(),
+                                c.getDataEncerramento()).toHours())))
+                .forEach((setor, media) -> tempos.put(setor.getSetor(), media));
+
+        return tempos;
+    }
+
+    private List<HelpdeskModel> filterByPeriod(List<HelpdeskModel> chamados, String period) {
+        LocalDate now = LocalDate.now();
+
+        switch (period.toLowerCase()) {
+            case "today":
+                return chamados.stream()
+                        .filter(c -> c.getDataAbertura().toLocalDate().equals(now))
+                        .collect(Collectors.toList());
+            case "week":
+                return chamados.stream()
+                        .filter(c -> c.getDataAbertura().toLocalDate().isAfter(now.minusWeeks(1)))
+                        .collect(Collectors.toList());
+            case "month":
+                return chamados.stream()
+                        .filter(c -> c.getDataAbertura().toLocalDate().isAfter(now.minusMonths(1)))
+                        .collect(Collectors.toList());
+            case "quarter":
+                return chamados.stream()
+                        .filter(c -> c.getDataAbertura().toLocalDate().isAfter(now.minusMonths(3)))
+                        .collect(Collectors.toList());
+            default:
+                return chamados;
+        }
     }
 }

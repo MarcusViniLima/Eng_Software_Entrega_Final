@@ -1,9 +1,8 @@
 // =====================================================
-// CONFIGURAÇÕES DA API - ATUALIZADAS PARA O JAVA
+// CONFIGURAÇÕES DA API
 // =====================================================
 const API_BASE_URL = 'http://localhost:8080';
 const TICKETS_ENDPOINT = '/helpdesk';
-const USER_EMAIL = "usuario@empresa.com"; // Deve vir da autenticação
 
 // Elementos DOM
 const ticketsContainer = document.getElementById('tickets-container');
@@ -13,67 +12,58 @@ const commentInput = document.getElementById('comment-input');
 const sendCommentBtn = document.getElementById('send-comment');
 const addCommentBtn = document.getElementById('add-comment');
 const closeTicketBtn = document.getElementById('close-ticket');
-
-// Variáveis globais
-let currentTicketId = null;
-let tickets = [];
+const cancelTicketBtn = document.getElementById('cancel-ticket');
+const resolveTicketBtn = document.getElementById('resolve-ticket');
+const assignTicketBtn = document.getElementById('assign-ticket');
 
 // =====================================================
-// FUNÇÕES DE COMUNICAÇÃO COM A API (AJUSTADAS PARA JAVA)
+// FUNÇÕES DE COMUNICAÇÃO COM A API
 // =====================================================
 
 /**
  * Busca os chamados do usuário logado
  */
-async function fetchUserTickets() {
+async function loadUserTickets() {
     try {
-        // Usa o endpoint por criador com email
-        const response = await fetch(`${API_BASE_URL}${TICKETS_ENDPOINT}/criador/${encodeURIComponent(USER_EMAIL)}`);
-        if (!response.ok) throw new Error('Erro ao buscar chamados');
-        
-        const ticketsFromServer = await response.json();
-        
-        // Converte para o formato esperado pelo frontend
-        tickets = ticketsFromServer.map(ticket => ({
-            id: ticket.id,
-            titulo: ticket.titulo,
-            setor: ticket.setor,
-            prioridade: ticket.prioridade,
-            descricao: ticket.descricao,
-            dataAbertura: ticket.dataAbertura,
-            status: ticket.status,
-            criador: ticket.criador,
-            fileName: ticket.fileName,
-            anexos: ticket.fileName ? [{ name: ticket.fileName }] : []
-        }));
-        
+        showLoading(true);
+        const response = await fetch(`${API_BASE_URL}${TICKETS_ENDPOINT}/criador/${localStorage.getItem('userEmail')}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao carregar chamados');
+        }
+
+        const tickets = await response.json();
         renderTickets(tickets);
-        
     } catch (error) {
-        console.error('Erro ao buscar chamados:', error);
-        ticketsContainer.innerHTML = `
-            <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i> Falha ao carregar chamados: ${error.message}
-            </div>
-        `;
+        console.error('Erro ao carregar chamados:', error);
+        showAlert('Erro ao carregar chamados: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
     }
 }
 
 /**
  * Busca detalhes de um chamado específico
- * @param {string} ticketId - ID do chamado (UUID)
  */
 async function fetchTicketDetails(ticketId) {
     try {
-        const response = await fetch(`${API_BASE_URL}${TICKETS_ENDPOINT}/${ticketId}`);
+        showLoading(true);
+        const response = await fetch(`${API_BASE_URL}${TICKETS_ENDPOINT}/${ticketId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        
         if (!response.ok) throw new Error('Erro ao buscar detalhes do chamado');
-        
+
         const ticket = await response.json();
-        
-        // Busca comentários associados
         const comentarios = await fetchComments(ticketId);
-        
-        // Formata para o frontend
+
         return {
             id: ticket.id,
             titulo: ticket.titulo,
@@ -92,21 +82,25 @@ async function fetchTicketDetails(ticketId) {
                 autor: c.autor || "Anônimo"
             }))
         };
-        
     } catch (error) {
         console.error('Erro ao buscar detalhes do chamado:', error);
-        alert('Falha ao carregar detalhes do chamado: ' + error.message);
+        showAlert('Falha ao carregar detalhes do chamado: ' + error.message, 'error');
         return null;
+    } finally {
+        showLoading(false);
     }
 }
 
 /**
  * Busca comentários de um chamado
- * @param {string} ticketId - ID do chamado
  */
 async function fetchComments(ticketId) {
     try {
-        const response = await fetch(`${API_BASE_URL}${TICKETS_ENDPOINT}/${ticketId}/comentarios`);
+        const response = await fetch(`${API_BASE_URL}${TICKETS_ENDPOINT}/${ticketId}/comentarios`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
         if (!response.ok) throw new Error('Erro ao buscar comentários');
         return await response.json();
     } catch (error) {
@@ -117,173 +111,214 @@ async function fetchComments(ticketId) {
 
 /**
  * Cria um novo chamado
- * @param {object} ticketData - Dados do novo chamado
- * @param {File} [file] - Arquivo anexo (opcional)
  */
-async function createNewTicket(ticketData, file) {
+async function createTicket(ticketData, file) {
+    const formData = new FormData();
+    const ticketModel = {
+        titulo: ticketData.title,
+        descricao: ticketData.description,
+        prioridade: ticketData.priority,
+        setor: ticketData.department,
+        criador: localStorage.getItem('userEmail'),
+        status: 'ABERTO'
+    };
+
+    formData.append('helpdeskModel', new Blob([JSON.stringify(ticketModel)], {
+        type: 'application/json'
+    }));
+
+    if (file) {
+        formData.append('file', file);
+    }
+
     try {
-        const formData = new FormData();
-        
-        // Adiciona dados do chamado
-        formData.append('helpdeskModel', new Blob([JSON.stringify(ticketData)], {
-            type: 'application/json'
-        }));
-        
-        // Adiciona arquivo se existir
-        if (file) {
-            formData.append('file', file);
-        }
-        
+        showLoading(true);
         const response = await fetch(`${API_BASE_URL}${TICKETS_ENDPOINT}`, {
             method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
             body: formData
         });
-        
+
         if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || 'Erro ao criar chamado');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Erro ao criar chamado');
         }
-        
+
         const newTicket = await response.json();
-        alert('Chamado criado com sucesso!');
-        await fetchUserTickets();
+        showAlert('Chamado criado com sucesso!', 'success');
         return newTicket;
-        
     } catch (error) {
         console.error('Erro ao criar chamado:', error);
-        alert('Falha ao criar chamado: ' + error.message);
-        return null;
+        showAlert('Erro ao criar chamado: ' + error.message, 'error');
+        throw error;
+    } finally {
+        showLoading(false);
     }
 }
 
 /**
  * Adiciona um comentário a um chamado
- * @param {string} ticketId - ID do chamado
- * @param {string} comentario - Comentário a ser adicionado
  */
 async function addCommentToTicket(ticketId, comentario) {
     try {
+        showLoading(true);
         const response = await fetch(`${API_BASE_URL}${TICKETS_ENDPOINT}/${ticketId}/comentario`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             },
-            body: JSON.stringify({ 
-                conteudo: comentario 
+            body: JSON.stringify({
+                conteudo: comentario,
+                autor: localStorage.getItem('userEmail')
             })
         });
-        
+
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(errorText || 'Erro ao adicionar comentário');
         }
-        
+
+        showAlert('Comentário adicionado com sucesso!', 'success');
         return await response.json();
-        
     } catch (error) {
         console.error('Erro ao adicionar comentário:', error);
-        alert('Falha ao adicionar comentário: ' + error.message);
+        showAlert('Falha ao adicionar comentário: ' + error.message, 'error');
         return null;
+    } finally {
+        showLoading(false);
     }
 }
 
 /**
  * Altera o status de um chamado
- * @param {string} ticketId - ID do chamado
- * @param {string} status - Novo status
  */
 async function changeTicketStatus(ticketId, status) {
     try {
+        showLoading(true);
         const response = await fetch(`${API_BASE_URL}${TICKETS_ENDPOINT}/status/${ticketId}?status=${status}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             }
         });
-        
+
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(errorText || 'Erro ao alterar status');
         }
-        
+
+        showAlert('Status do chamado atualizado com sucesso!', 'success');
         return await response.json();
-        
     } catch (error) {
         console.error('Erro ao alterar status:', error);
-        alert('Falha ao alterar status: ' + error.message);
+        showAlert('Falha ao alterar status: ' + error.message, 'error');
         return null;
+    } finally {
+        showLoading(false);
     }
 }
 
 /**
  * Cancela um chamado
- * @param {string} ticketId - ID do chamado
  */
 async function cancelTicket(ticketId) {
     try {
+        showLoading(true);
         const response = await fetch(`${API_BASE_URL}${TICKETS_ENDPOINT}/${ticketId}/cancelar`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             }
         });
-        
+
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(errorText || 'Erro ao cancelar chamado');
         }
-        
+
+        showAlert('Chamado cancelado com sucesso!', 'success');
         return await response.json();
-        
     } catch (error) {
         console.error('Erro ao cancelar chamado:', error);
-        alert('Falha ao cancelar chamado: ' + error.message);
+        showAlert('Falha ao cancelar chamado: ' + error.message, 'error');
         return null;
+    } finally {
+        showLoading(false);
+    }
+}
+
+/**
+ * Atribui um técnico a um chamado
+ */
+async function assignTechnician(ticketId, technicianEmail) {
+    try {
+        showLoading(true);
+        const response = await fetch(`${API_BASE_URL}${TICKETS_ENDPOINT}/atribuir/${ticketId}?tecnico=${encodeURIComponent(technicianEmail)}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Falha ao atribuir técnico');
+        }
+
+        showAlert('Técnico atribuído com sucesso!', 'success');
+        return await response.json();
+    } catch (error) {
+        console.error('Erro ao atribuir técnico:', error);
+        showAlert('Erro ao atribuir técnico: ' + error.message, 'error');
+        return null;
+    } finally {
+        showLoading(false);
     }
 }
 
 // =====================================================
-// FUNÇÕES DE RENDERIZAÇÃO DA INTERFACE (ATUALIZADAS)
+// FUNÇÕES DE RENDERIZAÇÃO
 // =====================================================
 
 /**
  * Renderiza os chamados do usuário
- * @param {array} tickets - Lista de chamados
  */
 function renderTickets(tickets) {
-    if (tickets.length === 0) {
-        ticketsContainer.innerHTML = `
-            <div class="no-tickets">
-                <i class="fas fa-inbox"></i>
-                <p>Você ainda não abriu nenhum chamado</p>
-            </div>
-        `;
+    const container = document.getElementById('tickets-container');
+    container.innerHTML = '';
+
+    if (!tickets || tickets.length === 0) {
+        container.innerHTML = '<div class="no-tickets">Nenhum chamado encontrado</div>';
         return;
     }
-    
-    ticketsContainer.innerHTML = '';
-    
+
     // Filtra por status
     const activeTickets = tickets.filter(t => t.status !== 'RESOLVIDO' && t.status !== 'FECHADO' && t.status !== 'CANCELADO');
     const resolvedTickets = tickets.filter(t => t.status === 'RESOLVIDO' || t.status === 'FECHADO');
     const canceledTickets = tickets.filter(t => t.status === 'CANCELADO');
-    
+
     // Renderiza chamados ativos
     activeTickets.forEach(ticket => {
         renderTicketCard(ticket);
     });
-    
+
     // Renderiza chamados resolvidos
     if (resolvedTickets.length > 0) {
-        ticketsContainer.innerHTML += `<h3 class="section-divider">Chamados Concluídos</h3>`;
+        container.innerHTML += '<h3 class="section-divider">Chamados Concluídos</h3>';
         resolvedTickets.forEach(ticket => {
             renderTicketCard(ticket);
         });
     }
-    
+
     // Renderiza chamados cancelados
     if (canceledTickets.length > 0) {
-        ticketsContainer.innerHTML += `<h3 class="section-divider">Chamados Cancelados</h3>`;
+        container.innerHTML += '<h3 class="section-divider">Chamados Cancelados</h3>';
         canceledTickets.forEach(ticket => {
             renderTicketCard(ticket);
         });
@@ -292,16 +327,18 @@ function renderTickets(tickets) {
 
 /**
  * Renderiza um cartão de chamado individual
- * @param {object} ticket - Dados do chamado
  */
 function renderTicketCard(ticket) {
     const card = document.createElement('div');
     card.className = `ticket-card ${ticket.prioridade.toLowerCase()}`;
-    card.dataset.ticket = ticket.id;
-    
-    // Formata a data
-    const formattedDate = new Date(ticket.dataAbertura).toLocaleDateString('pt-BR');
-    
+    card.dataset.ticketId = ticket.id;
+
+    const formattedDate = new Date(ticket.dataAbertura).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+
     card.innerHTML = `
         <div class="ticket-icon">
             <i class="${getIconForDepartment(ticket.setor)}"></i>
@@ -309,91 +346,94 @@ function renderTicketCard(ticket) {
         <div class="ticket-content">
             <div class="ticket-title">${ticket.titulo}</div>
             <div class="ticket-meta">
-                <div class="ticket-department"><i class="fas fa-building"></i> ${ticket.setor}</div>
-                <div class="ticket-date"><i class="far fa-calendar"></i> ${formattedDate}</div>
+                <div class="ticket-department">
+                    <i class="fas fa-building"></i> ${ticket.setor}
+                </div>
+                <div class="ticket-date">
+                    <i class="far fa-calendar"></i> ${formattedDate}
+                </div>
             </div>
         </div>
-        <div class="ticket-priority ${ticket.prioridade.toLowerCase()}">${getPriorityLabel(ticket.prioridade)}</div>
-        <div class="ticket-status ${ticket.status.toLowerCase()}">${getStatusLabel(ticket.status)}</div>
+        <div class="ticket-priority ${ticket.prioridade.toLowerCase()}">
+            ${getPriorityLabel(ticket.prioridade)}
+        </div>
+        <div class="ticket-status ${ticket.status.toLowerCase()}">
+            ${getStatusLabel(ticket.status)}
+        </div>
     `;
-    
+
+    card.addEventListener('click', () => openTicketModal(ticket.id));
     ticketsContainer.appendChild(card);
 }
 
 /**
  * Abre o modal com detalhes do chamado
- * @param {string} ticketId - ID do chamado
  */
 async function openTicketModal(ticketId) {
     currentTicketId = ticketId;
     const ticket = await fetchTicketDetails(ticketId);
-    
+
     if (!ticket) return;
-    
+
     // Preenche os dados do modal
     document.getElementById('modal-title').textContent = ticket.titulo;
-    document.getElementById('modal-id').textContent = `#${ticket.id}`;
+    document.getElementById('modal-id').textContent = `#${ticket.id.substring(0, 8)}`;
     document.getElementById('modal-department').textContent = ticket.setor;
     document.getElementById('modal-author').textContent = ticket.criador;
     document.getElementById('modal-date').textContent = new Date(ticket.dataAbertura).toLocaleDateString('pt-BR');
     document.getElementById('modal-description').textContent = ticket.descricao;
-    document.getElementById('modal-priority').textContent = getPriorityLabel(ticket.prioridade);
-    document.getElementById('modal-status').textContent = getStatusLabel(ticket.status);
     
-    // Atualiza classes de prioridade e status
+    // Atualiza prioridade e status
     const priorityEl = document.getElementById('modal-priority');
+    priorityEl.textContent = getPriorityLabel(ticket.prioridade);
     priorityEl.className = `ticket-priority ${ticket.prioridade.toLowerCase()}`;
-    
+
     const statusEl = document.getElementById('modal-status');
+    statusEl.textContent = getStatusLabel(ticket.status);
     statusEl.className = `ticket-status ${ticket.status.toLowerCase()}`;
-    
-    // Renderiza anexos
+
+    // Renderiza anexos e comentários
     renderAttachments(ticket.anexos);
-    
-    // Renderiza comentários como histórico
     renderComments(ticket.comentarios);
-    
-    // Atualiza visibilidade dos botões
+
+    // Atualiza botões de ação
     updateActionButtons(ticket.status);
-    
+
     // Exibe o modal
     ticketModal.style.display = 'block';
 }
 
 /**
  * Atualiza os botões de ação baseado no status
- * @param {string} status - Status atual do chamado
  */
 function updateActionButtons(status) {
     // Esconde todos os botões inicialmente
     document.querySelectorAll('.action-button').forEach(btn => {
         btn.style.display = 'none';
     });
-    
+
     // Mostra botões relevantes
     if (status === 'ABERTO') {
-        document.getElementById('cancel-ticket').style.display = 'inline-block';
-        document.getElementById('assign-ticket').style.display = 'inline-block';
-    }
-    else if (status === 'EM_ANDAMENTO') {
-        document.getElementById('resolve-ticket').style.display = 'inline-block';
-        document.getElementById('cancel-ticket').style.display = 'inline-block';
+        cancelTicketBtn.style.display = 'inline-block';
+        assignTicketBtn.style.display = 'inline-block';
+    } else if (status === 'EM_ANDAMENTO') {
+        resolveTicketBtn.style.display = 'inline-block';
+        cancelTicketBtn.style.display = 'inline-block';
     }
 }
 
 /**
  * Renderiza os anexos no modal
- * @param {array} attachments - Lista de anexos
  */
 function renderAttachments(attachments) {
     const container = document.getElementById('modal-attachments');
     container.innerHTML = '';
-    
+
     if (!attachments || attachments.length === 0) {
         container.innerHTML = '<div class="no-attachments">Nenhum anexo disponível</div>';
         return;
     }
-    
+
     attachments.forEach(attachment => {
         const attachmentEl = document.createElement('a');
         attachmentEl.className = 'attachment';
@@ -409,103 +449,119 @@ function renderAttachments(attachments) {
 
 /**
  * Renderiza os comentários como histórico
- * @param {array} comments - Lista de comentários
  */
 function renderComments(comments) {
     const container = document.getElementById('ticket-history');
     container.innerHTML = '';
-    
+
     if (!comments || comments.length === 0) {
-        container.innerHTML = `
-            <div class="history-item">
-                <div class="history-content">Nenhum comentário disponível</div>
-            </div>
-        `;
+        container.innerHTML = '<div class="no-comments">Nenhum comentário disponível</div>';
         return;
     }
-    
-    container.innerHTML = '<h3>Histórico de Comentários</h3>';
-    
+
     comments.forEach(comment => {
         const commentEl = document.createElement('div');
         commentEl.className = 'history-item';
-        
-        const formattedDate = new Date(comment.dataComentario).toLocaleString('pt-BR');
-        
+
+        const formattedDate = new Date(comment.dataComentario).toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
         commentEl.innerHTML = `
-            <div class="history-author">${comment.autor}</div>
-            <div class="history-time">${formattedDate}</div>
+            <div class="history-header">
+                <span class="history-author">${comment.autor}</span>
+                <span class="history-time">${formattedDate}</span>
+            </div>
             <div class="history-content">${comment.conteudo}</div>
         `;
-        
+
         container.appendChild(commentEl);
     });
 }
 
 // =====================================================
-// FUNÇÕES AUXILIARES (ATUALIZADAS)
+// FUNÇÕES AUXILIARES
 // =====================================================
 
-/**
- * Retorna o ícone apropriado para o departamento
- * @param {string} department - Departamento do chamado
- * @returns {string} Classe do ícone FontAwesome
- */
 function getIconForDepartment(department) {
-    switch(department.toLowerCase()) {
-        case 'ti': return 'fas fa-laptop';
-        case 'rh': return 'fas fa-users';
-        case 'financeiro': return 'fas fa-file-invoice-dollar';
-        case 'marketing': return 'fas fa-bullhorn';
-        default: return 'fas fa-question-circle';
-    }
-}
-
-/**
- * Retorna o texto correspondente à prioridade
- * @param {string} priority - Prioridade do chamado
- * @returns {string} Texto da prioridade
- */
-function getPriorityLabel(priority) {
-    switch(priority) {
-        case 'ALTA': return 'Alta Prioridade';
-        case 'MEDIA': return 'Média Prioridade';
-        case 'BAIXA': return 'Baixa Prioridade';
-        default: return priority;
-    }
-}
-
-/**
- * Retorna o texto correspondente ao status
- * @param {string} status - Status do chamado
- * @returns {string} Texto do status
- */
-function getStatusLabel(status) {
-    switch(status) {
-        case 'ABERTO': return 'Aberto';
-        case 'EM_ANDAMENTO': return 'Em andamento';
-        case 'RESOLVIDO': return 'Resolvido';
-        case 'FECHADO': return 'Fechado';
-        case 'CANCELADO': return 'Cancelado';
-        default: return status;
-    }
-}
-
-// =====================================================
-// EVENT LISTENERS E INICIALIZAÇÃO (ATUALIZADOS)
-// =====================================================
-
-// Inicialização
-document.addEventListener('DOMContentLoaded', async () => {
-    // Carrega os chamados do usuário
-    await fetchUserTickets();
+    const departmentIcons = {
+        'ti': 'fas fa-laptop-code',
+        'rh': 'fas fa-users',
+        'financeiro': 'fas fa-file-invoice-dollar',
+        'marketing': 'fas fa-bullhorn',
+        'administrativo': 'fas fa-building',
+        'outros': 'fas fa-question-circle'
+    };
     
-    // Configura os event listeners
-    setupEventListeners();
-});
+    const normalizedDept = department.toLowerCase().replace(/\s+/g, '');
+    return departmentIcons[normalizedDept] || departmentIcons['outros'];
+}
 
-function setupEventListeners() {
-    // Seleção de prioridade
+function getPriorityLabel(priority) {
+    const priorityLabels = {
+        'ALTA': 'Alta Prioridade',
+        'MEDIA': 'Média Prioridade',
+        'BAIXA': 'Baixa Prioridade'
+    };
+    return priorityLabels[priority] || priority;
+}
+
+function getStatusLabel(status) {
+    const statusLabels = {
+        'ABERTO': 'Aberto',
+        'EM_ANDAMENTO': 'Em Andamento',
+        'RESOLVIDO': 'Resolvido',
+        'FECHADO': 'Fechado',
+        'CANCELADO': 'Cancelado'
+    };
+    return statusLabels[status] || status;
+}
+
+function showAlert(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.textContent = message;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.classList.add('fade-out');
+        setTimeout(() => alertDiv.remove(), 500);
+    }, 3000);
+}
+
+function showLoading(show) {
+    const loadingDiv = document.getElementById('loading-overlay') || createLoadingOverlay();
+    loadingDiv.style.display = show ? 'flex' : 'none';
+}
+
+function createLoadingOverlay() {
+    const loadingDiv = document.createElement('div');
+    loadingDiv.id = 'loading-overlay';
+    loadingDiv.innerHTML = '<div class="spinner"></div>';
+    document.body.appendChild(loadingDiv);
+    return loadingDiv;
+}
+
+// =====================================================
+// EVENT LISTENERS E INICIALIZAÇÃO
+// =====================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Verifica autenticação
+    if (!localStorage.getItem('authToken')) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // Carrega dados do usuário
+    document.getElementById('user-name').textContent = localStorage.getItem('userName') || 'Usuário';
+    
+    // Configura prioridades
     document.querySelectorAll('.priority-option').forEach(option => {
         option.addEventListener('click', function() {
             document.querySelectorAll('.priority-option').forEach(opt => {
@@ -515,140 +571,89 @@ function setupEventListeners() {
             document.getElementById('priority').value = this.dataset.priority;
         });
     });
-    
-    // Upload de arquivo
-    document.getElementById('file-upload').addEventListener('click', function() {
+
+    // Configura upload de arquivo
+    document.getElementById('file-upload').addEventListener('click', () => {
         document.getElementById('file-input').click();
     });
-    
-    document.getElementById('file-input').addEventListener('change', function(e) {
+
+    document.getElementById('file-input').addEventListener('change', function() {
         if (this.files.length > 0) {
             document.querySelector('.file-info').textContent = this.files[0].name;
         }
     });
-    
-    // Abertura de novo chamado
-    ticketForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        // Coleta os dados do formulário
-        const ticketData = {
-            titulo: document.getElementById('ticket-title').value,
-            setor: document.getElementById('department').value,
-            prioridade: document.getElementById('priority').value,
-            descricao: document.getElementById('description').value,
-            criador: USER_EMAIL
-        };
-        
-        // Validação
-        if (!ticketData.titulo || !ticketData.setor || !ticketData.prioridade || !ticketData.descricao) {
-            alert('Por favor, preencha todos os campos obrigatórios.');
-            return;
-        }
-        
-        // Obtém o arquivo selecionado
-        const fileInput = document.getElementById('file-input');
-        const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
-        
-        // Cria o novo chamado
-        await createNewTicket(ticketData, file);
-        
-        // Reseta o formulário
+
+    // Carrega chamados
+    loadUserTickets();
+});
+
+// Formulário de novo chamado
+ticketForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById('ticket-title').value;
+    const department = document.getElementById('department').value;
+    const priority = document.getElementById('priority').value;
+    const description = document.getElementById('description').value;
+    const fileInput = document.getElementById('file-input');
+    const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
+
+    try {
+        await createTicket({ title, department, priority, description }, file);
         ticketForm.reset();
-        document.querySelectorAll('.priority-option').forEach(opt => {
-            opt.classList.remove('active');
-        });
         document.querySelector('.file-info').textContent = 'Nenhum arquivo selecionado';
-        document.getElementById('priority').value = '';
-    });
-    
-    // Abrir detalhes do chamado
-    ticketsContainer.addEventListener('click', (e) => {
-        const ticketCard = e.target.closest('.ticket-card');
-        if (ticketCard) {
-            const ticketId = ticketCard.dataset.ticket;
-            openTicketModal(ticketId);
-        }
-    });
-    
-    // Fechar modal
-    document.querySelector('.close-modal').addEventListener('click', () => {
+        loadUserTickets();
+    } catch (error) {
+        console.error('Erro no formulário:', error);
+    }
+});
+
+// Fechar modal
+document.querySelector('.close-modal').addEventListener('click', () => {
+    ticketModal.style.display = 'none';
+});
+
+// Fechar modal ao clicar fora
+window.addEventListener('click', (e) => {
+    if (e.target === ticketModal) {
         ticketModal.style.display = 'none';
-    });
-    
-    // Fechar modal ao clicar fora
-    window.addEventListener('click', (event) => {
-        if (event.target === ticketModal) {
-            ticketModal.style.display = 'none';
-        }
-    });
-    
-    // Enviar comentário
-    sendCommentBtn.addEventListener('click', async () => {
-        const comment = commentInput.value.trim();
-        
-        if (!comment) {
-            alert('Por favor, digite uma mensagem.');
-            return;
-        }
-        
-        await addCommentToTicket(currentTicketId, comment);
-        commentInput.value = '';
-        
-        // Recarrega os detalhes do chamado
-        await openTicketModal(currentTicketId);
-    });
-    
-    // Botão alternativo para adicionar comentário
-    addCommentBtn.addEventListener('click', async () => {
-        const comment = commentInput.value.trim();
-        
-        if (!comment) {
-            alert('Por favor, digite uma mensagem.');
-            return;
-        }
-        
-        await addCommentToTicket(currentTicketId, comment);
-        commentInput.value = '';
-        
-        // Recarrega os detalhes do chamado
-        await openTicketModal(currentTicketId);
-    });
-    
-    // Botões de ação
-    document.getElementById('cancel-ticket').addEventListener('click', async () => {
-        if (confirm('Tem certeza que deseja cancelar este chamado?')) {
-            await cancelTicket(currentTicketId);
-            ticketModal.style.display = 'none';
-            await fetchUserTickets();
-        }
-    });
-    
-    document.getElementById('resolve-ticket').addEventListener('click', async () => {
-        if (confirm('Marcar este chamado como resolvido?')) {
-            await changeTicketStatus(currentTicketId, 'RESOLVIDO');
-            ticketModal.style.display = 'none';
-            await fetchUserTickets();
-        }
-    });
-    
-    document.getElementById('assign-ticket').addEventListener('click', async () => {
-        const tecnico = prompt('Digite o email do técnico responsável:');
-        if (tecnico) {
-            try {
-                const response = await fetch(`${API_BASE_URL}${TICKETS_ENDPOINT}/atribuir/${currentTicketId}?tecnico=${encodeURIComponent(tecnico)}`, {
-                    method: 'PUT'
-                });
-                
-                if (!response.ok) throw new Error('Falha ao atribuir técnico');
-                
-                alert('Técnico atribuído com sucesso!');
-                await openTicketModal(currentTicketId);
-                
-            } catch (error) {
-                console.error('Erro ao atribuir técnico:', error);
-                alert('Erro: ' + error.message);
-            }
-        }
-    });
-}
+    }
+});
+
+// Enviar comentário
+sendCommentBtn.addEventListener('click', async () => {
+    const comment = commentInput.value.trim();
+    if (!comment) {
+        showAlert('Por favor, digite uma mensagem', 'warning');
+        return;
+    }
+
+    await addCommentToTicket(currentTicketId, comment);
+    commentInput.value = '';
+    openTicketModal(currentTicketId); // Recarrega
+});
+
+// Botões de ação
+cancelTicketBtn.addEventListener('click', async () => {
+    if (confirm('Tem certeza que deseja cancelar este chamado?')) {
+        await cancelTicket(currentTicketId);
+        ticketModal.style.display = 'none';
+        loadUserTickets();
+    }
+});
+
+resolveTicketBtn.addEventListener('click', async () => {
+    if (confirm('Marcar este chamado como resolvido?')) {
+        await changeTicketStatus(currentTicketId, 'RESOLVIDO');
+        ticketModal.style.display = 'none';
+        loadUserTickets();
+    }
+});
+
+assignTicketBtn.addEventListener('click', async () => {
+    const tecnico = prompt('Digite o email do técnico responsável:');
+    if (tecnico) {
+        await assignTechnician(currentTicketId, tecnico);
+        openTicketModal(currentTicketId); // Recarrega
+    }
+});

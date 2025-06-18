@@ -1,12 +1,13 @@
 // =====================================================
 // CONFIGURAÇÕES DA API - ATUALIZADAS
 // =====================================================
-const API_BASE_URL = 'http://localhost:8080'; // URL base do backend Java
-const LOGIN_ENDPOINT = '/auth/login';          // Endpoint para autenticação
-const REGISTER_ENDPOINT = '/funcionario';      // Endpoint para cadastro de funcionários
+const API_BASE_URL = 'http://localhost:8080';
+const LOGIN_ENDPOINT = '/auth/login';
+const REGISTER_ENDPOINT = '/auth/register'; // Novo endpoint sugerido
+const FUNCIONARIO_ENDPOINT = '/funcionario'; // Endpoint existente
 
 // =====================================================
-// GERENCIAMENTO DAS TABS (LOGIN/CADASTRO)
+// GERENCIAMENTO DAS TABS (LOGIN/CADASTRO) - MANTIDO
 // =====================================================
 document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -14,21 +15,21 @@ document.querySelectorAll('.tab').forEach(tab => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         // Adiciona classe ativa na tab clicada
         tab.classList.add('active');
-        
+
         // Esconde todos os painéis
         document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-        
+
         // Mostra o painel correspondente à tab
         const tabId = tab.getAttribute('data-tab');
         const tabPane = document.getElementById(`${tabId}-tab`);
         tabPane.classList.add('active');
-        
+
         // Rolagem para o topo do formulário
         tabPane.scrollTop = 0;
     });
 });
 
-// Links para alternar entre as tabs
+// Links para alternar entre as tabs - MANTIDO
 document.querySelectorAll('.login-tab').forEach(link => {
     link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -43,184 +44,193 @@ document.querySelectorAll('.signup-tab').forEach(link => {
     });
 });
 
-// Função para alternar entre as tabs
+// Função para alternar entre as tabs - MANTIDO
 function switchTab(tabName) {
     // Atualiza a tab ativa
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
-    
+
     // Atualiza o painel visível
     document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
     const tabPane = document.getElementById(`${tabName}-tab`);
     tabPane.classList.add('active');
-    
+
     // Rolagem para o topo do formulário
     tabPane.scrollTop = 0;
 }
 
 // =====================================================
-// FUNÇÕES DE COMUNICAÇÃO COM A API (BACKEND JAVA) - ATUALIZADAS
+// FUNÇÕES DE COMUNICAÇÃO COM A API - ATUALIZADAS
 // =====================================================
 
-/**
- * Realiza o login do usuário via API
- * @param {string} email - Email do usuário
- * @param {string} senha - Senha do usuário
- */
-async function loginUser(email, senha) {
+async function loginUser(email, password) {
     try {
-        const response = await fetch(API_BASE_URL + LOGIN_ENDPOINT, {
+        const response = await fetch(`${API_BASE_URL}${LOGIN_ENDPOINT}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ 
-                email: email, 
-                senha: senha
+            body: JSON.stringify({
+                email: email,
+                password: password
             })
         });
 
-        // Verifica se a resposta não foi bem sucedida
         if (!response.ok) {
-            // Tenta extrair mensagem de erro
-            let errorMsg = 'Erro na autenticação';
-            try {
-                const errorData = await response.json();
-                errorMsg = errorData.error || errorData.message || errorMsg;
-            } catch (e) {
-                const errorText = await response.text();
-                errorMsg = errorText || errorMsg;
-            }
-            throw new Error(errorMsg);
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Erro na autenticação');
         }
 
-        // Extrai o token da resposta (agora em JSON)
-        const data = await response.json();
-        const token = data.token;
+        // Backend retorna apenas o token como string
+        const token = await response.text();
         
-        if (!token) {
-            throw new Error('Token não recebido na resposta');
-        }
-        
-        // Armazena o token
+        // Armazena o token e informações do usuário
         localStorage.setItem('authToken', token);
+        localStorage.setItem('userEmail', email);
         
-        // Feedback e redirecionamento
-        alert('Autenticação realizada com sucesso! Redirecionando...');
-        window.location.href = 'dashboard.html';
-        
+        // Busca informações adicionais do usuário
+        await fetchUserDetails(email);
+
+        return { token };
     } catch (error) {
-        console.error('Erro na autenticação:', error);
-        alert('Falha na autenticação: ' + error.message);
+        console.error('Erro no login:', error);
+        throw error;
     }
 }
 
-/**
- * Registra um novo funcionário via API
- * @param {Object} userData - Dados do funcionário para cadastro
- */
-async function registerUser(userData) {
+async function fetchUserDetails(email) {
     try {
-        const response = await fetch(API_BASE_URL + REGISTER_ENDPOINT, {
-            method: 'POST',
+        const response = await fetch(`${API_BASE_URL}${FUNCIONARIO_ENDPOINT}/email/${encodeURIComponent(email)}`, {
             headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            }
         });
 
-        // Verifica se a resposta não foi bem sucedida
+        if (response.ok) {
+            const userData = await response.json();
+            localStorage.setItem('userName', userData.name);
+            localStorage.setItem('userDepartment', userData.setor);
+        }
+    } catch (error) {
+        console.error('Erro ao buscar detalhes do usuário:', error);
+    }
+}
+
+async function registerUser(userData) {
+    try {
+        // Validação básica dos dados
+        if (!userData.name || !userData.cpf || !userData.email || !userData.password || !userData.department) {
+            throw new Error('Todos os campos são obrigatórios');
+        }
+
+        // Formata o CPF (remove pontuação)
+        const cpfLimpo = userData.cpf.replace(/\D/g, '');
+
+        // Formata o departamento (maiúsculas)
+        const departamentoFormatado = userData.department.toUpperCase();
+
+        // Cadastro de funcionário
+        const response = await fetch(`${API_BASE_URL}${FUNCIONARIO_ENDPOINT}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                name: userData.name.trim(),
+                email: userData.email.trim(),
+                setor: departamentoFormatado,
+                password: userData.password,
+                cpf: cpfLimpo
+            })
+        });
+
+        const responseData = await response.json();
+
         if (!response.ok) {
-            let errorMsg = 'Erro ao criar conta';
-            try {
-                const errorData = await response.json();
-                errorMsg = errorData.error || errorData.message || errorMsg;
-            } catch (e) {
-                const errorText = await response.text();
-                errorMsg = errorText || errorMsg;
-            }
+            // Tenta obter a mensagem de erro do backend
+            const errorMsg = responseData.message || 
+                            responseData.error || 
+                            'Erro ao criar conta de funcionário';
             throw new Error(errorMsg);
         }
 
-        // Processa a resposta JSON
-        const data = await response.json();
-        console.log('Funcionário cadastrado:', data);
-        
-        alert('Conta criada com sucesso! Faça login para continuar.');
-        switchTab('login');
-        
+        // Faz login automaticamente após cadastro
+        await loginUser(userData.email, userData.password);
+        return true;
     } catch (error) {
-        console.error('Erro no cadastro:', error);
-        alert('Falha no cadastro: ' + error.message);
+        console.error('Erro detalhado no cadastro:', error);
+        throw new Error(error.message || 'Erro ao processar cadastro');
     }
 }
 
 // =====================================================
-// EVENTOS DE SUBMIT DOS FORMULÁRIOS - ATUALIZADOS
+// EVENTOS DE SUBMIT ATUALIZADOS
 // =====================================================
 
-// Formulário de Login
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Captura dos dados
     const email = document.getElementById('email').value;
-    const senha = document.getElementById('password').value;
-    
-    // Validação básica
-    if (!email || !senha) {
-        alert('Por favor, preencha todos os campos.');
-        return;
+    const password = document.getElementById('password').value;
+
+    try {
+        await loginUser(email, password);
+        
+        // Redireciona com base no departamento
+        const department = localStorage.getItem('userDepartment');
+        if (department === 'TI') {
+            window.location.href = 'dashboard-tecnico.html';
+        } else {
+            window.location.href = 'dashboard-usuario.html';
+        }
+    } catch (error) {
+        showError('Falha no login: ' + error.message);
     }
-    
-    // Chamada ao login
-    await loginUser(email, senha);
 });
 
-// Formulário de Cadastro
 document.getElementById('signup-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('signup-email').value;
-    const department = document.getElementById('department').value;
-    const password = document.getElementById('signup-password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
-    
-    if (!name || !email || !department || !password || !confirmPassword) {
-        alert('Por favor, preencha todos os campos.');
-        return;
-    }
-    
-    if (password !== confirmPassword) {
-        alert('As senhas não coincidem. Por favor, tente novamente.');
-        return;
-    }
-    
-    // Mapeamento dos departamentos para valores esperados pelo backend
-    const departmentMapping = {
-        'ti': 'TI',
-        'rh': 'RH',
-        'financeiro': 'FINANCEIRO',
-        'vendas': 'VENDAS',
-        'marketing': 'MARKETING',
-        'operacoes': 'OPERACOES'
+    const userData = {
+        name: document.getElementById('name').value,
+        cpf: document.getElementById('cpf').value,
+        email: document.getElementById('signup-email').value,
+        password: document.getElementById('signup-password').value,
+        department: document.getElementById('department').value
     };
 
-    // Obtém o valor mapeado ou usa o valor original se não estiver no mapeamento
-    const mappedDepartment = departmentMapping[department.toLowerCase()] || department.toUpperCase();
-    
-    // Preparar os dados no formato esperado pelo Java (FuncionarioModel)
-    const userData = {
-        nome: name,
-        email: email,
-        departamento: mappedDepartment, // Usa o valor mapeado
-        senha: password
-    };
-    
-    // Chamar a função de cadastro
-    await registerUser(userData);
-    
-    // Limpar o formulário
-    document.getElementById('signup-form').reset();
+    // Validação de senha
+    if (userData.password !== document.getElementById('confirm-password').value) {
+        showError('As senhas não coincidem!');
+        return;
+    }
+
+    try {
+        await registerUser(userData);
+        showSuccess('Cadastro realizado com sucesso! Redirecionando...');
+    } catch (error) {
+        showError('Erro no cadastro: ' + error.message);
+    }
 });
+
+// =====================================================
+// FUNÇÕES AUXILIARES - MANTIDAS
+// =====================================================
+
+function showError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert error';
+    errorDiv.innerHTML = `<strong>Erro:</strong> ${message}<br>
+                         <small>Verifique os dados e tente novamente</small>`;
+    document.querySelector('.tab-pane.active').prepend(errorDiv);
+    setTimeout(() => errorDiv.remove(), 8000);
+}
+
+function showSuccess(message) {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'alert success';
+    successDiv.textContent = message;
+    document.querySelector('.tab-pane.active').prepend(successDiv);
+    setTimeout(() => successDiv.remove(), 5000);
+}

@@ -1,18 +1,6 @@
 
 services:
-  # Service Discovery
-  eureka-server:
-    image: barathece91/spring-cloud-gateway-eureka-server
-    container_name: eureka-server
-    environment:
-      - SPRING_PROFILES_ACTIVE=eureka-server
-      - LOGGING_LEVEL_COM_NETFLIX_DISCOVERY=DEBUG
-    ports:
-      - "8761:8761"
-    networks:
-      - app-network
-
-  # Databases - Um para cada serviço
+# Databases - Um para cada serviço
   mysql-funcionario:
     image: mysql:8.0
     container_name: mysql-funcionario
@@ -88,8 +76,6 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       API_SECURITY_TOKEN_SECRET: cb9404a187ec5b9d9e73af07cb02d13a2c6a24b03469dfb8dad96f84bed1898d
-    depends_on:
-      - eureka-server
     networks:
       - app-network
 
@@ -111,7 +97,6 @@ services:
       SPRING_RABBITMQ_SSL_ENABLED: "true"
     depends_on:
       - mysql-funcionario
-      - eureka-server
     networks:
       - app-network
 
@@ -136,7 +121,6 @@ services:
       - uploads:/app/uploads
     depends_on:
       - mysql-helpdesk
-      - eureka-server
     networks:
       - app-network
 
@@ -159,7 +143,6 @@ services:
       API_SECURITY_TOKEN_SECRET: cb9d04a187ec5b9d9e73af07cb02d13a2c6a24b03469dfb8dad96f84bed1898d
     depends_on:
       - mysql-security
-      - eureka-server
     networks:
       - app-network
 
@@ -185,7 +168,6 @@ services:
       SPRING_RABBITMQ_SSL_ENABLED: "true"
     depends_on:
       - mysql-email
-      - eureka-server
     networks:
       - app-network
 

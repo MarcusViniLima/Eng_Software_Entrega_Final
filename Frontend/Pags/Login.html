@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="../CSS/Styles_Login.css">
     <script src="../JS/Login.js" defer></script>
 </head>
+
 <body>
     <div class="background">
         <div class="stain stain-1"></div>
@@ -16,7 +18,7 @@
         <div class="stain stain-4"></div>
         <div class="stain stain-5"></div>
     </div>
-    
+
     <div class="container">
         <!-- Camada da marca - LADO ESQUERDO -->
         <div class="brand-layer">
@@ -25,14 +27,14 @@
                 <div class="slogan">Nada se perde, tudo se resolve.</div>
             </div>
         </div>
-        
+
         <!-- Card de login/cadastro - LADO DIREITO -->
         <div class="login-card">
             <div class="tabs">
                 <div class="tab active" data-tab="login">Login</div>
                 <div class="tab" data-tab="cadastro">Cadastro</div>
             </div>
-            
+
             <div class="tab-content">
                 <!-- Login Tab -->
                 <div id="login-tab" class="tab-pane active">
@@ -40,84 +42,92 @@
                         <h2>Acesse sua conta</h2>
                         <p>Bem-vindo de volta! Por favor, insira suas credenciais.</p>
                     </div>
-                    
+
                     <form id="login-form">
                         <div class="form-group">
                             <label for="email">Email</label>
                             <i class="fas fa-envelope form-icon"></i>
                             <input type="email" id="email" class="form-control" placeholder="seu@email.com" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="password">Senha</label>
                             <i class="fas fa-lock form-icon"></i>
                             <input type="password" id="password" class="form-control" placeholder="Sua senha" required>
                         </div>
-                        
+
                         <div class="checkbox-group">
                             <input type="checkbox" id="remember">
                             <label for="remember">Lembrar minha senha</label>
                         </div>
-                        
+
                         <button type="submit" class="btn">Entrar</button>
-                        
+
                         <div class="signup-link">
                             Não tem uma conta? <a href="#" class="signup-tab">Cadastre-se</a>
                         </div>
                     </form>
                 </div>
-                
+
                 <!-- Cadastro Tab -->
                 <div id="cadastro-tab" class="tab-pane">
                     <div class="welcome">
                         <h2>Crie sua conta</h2>
                         <p>Preencha os campos abaixo para criar uma conta.</p>
                     </div>
-                    
+
                     <form id="signup-form">
                         <div class="form-group">
                             <label for="name">Nome Completo</label>
                             <i class="fas fa-user form-icon"></i>
-                            <input type="text" id="name" class="form-control" placeholder="Seu nome completo" required>
+                            <input type="text" id="name" class="form-control" placeholder="Seu nome completo" required
+                                pattern="^[A-Z][a-z]+(\s[A-Z][a-z]+)*$" title="Nome deve começar com letra maiúscula">
                         </div>
-                        
+
+                        <div class="form-group">
+                            <label for="cpf">CPF</label>
+                            <i class="fas fa-id-card form-icon"></i>
+                            <input type="text" id="cpf" class="form-control" placeholder="000.000.000-00" required
+                                pattern="\d{3}\.\d{3}\.\d{3}-\d{2}">
+                        </div>
+
                         <div class="form-group">
                             <label for="signup-email">Email</label>
                             <i class="fas fa-envelope form-icon"></i>
-                            <input type="email" id="signup-email" class="form-control" placeholder="seu@email.com" required>
+                            <input type="email" id="signup-email" class="form-control" placeholder="seu@email.com"
+                                required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="department">Departamento</label>
                             <i class="fas fa-building form-icon"></i>
                             <select id="department" class="form-control" required>
                                 <option value="">Selecione seu departamento</option>
-                                <option value="ti">Tecnologia da Informação</option>
-                                <option value="rh">Recursos Humanos</option>
-                                <option value="financeiro">Financeiro</option>
-                                <option value="vendas">Vendas</option>
-                                <option value="marketing">Marketing</option>
-                                <option value="operacoes">Operações</option>
+                                <option value="TI">Tecnologia da Informação</option>
+                                <option value="RH">Recursos Humanos</option>
+                                <option value="FINANCEIRO">Financeiro</option>
+                                <option value="MARKETING">Marketing</option>
+                                <option value="VENDAS">Vendas</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="signup-password">Senha</label>
                             <i class="fas fa-lock form-icon"></i>
-                            <input type="password" id="signup-password" class="form-control" placeholder="Crie uma senha" required>
+                            <input type="password" id="signup-password" class="form-control"
+                                placeholder="Crie uma senha" required
+                                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+                                title="A senha deve conter pelo menos 8 caracteres, incluindo maiúsculas, minúsculas, números e caracteres especiais">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="confirm-password">Confirmar Senha</label>
                             <i class="fas fa-lock form-icon"></i>
-                            <input type="password" id="confirm-password" class="form-control" placeholder="Confirme sua senha" required>
+                            <input type="password" id="confirm-password" class="form-control"
+                                placeholder="Confirme sua senha" required>
                         </div>
-                        
+
                         <button type="submit" class="btn">Criar Conta</button>
-                        
-                        <div class="signup-link">
-                            Já tem uma conta? <a href="#" class="login-tab">Faça login</a>
-                        </div>
                     </form>
                 </div>
             </div>
@@ -125,4 +135,5 @@
     </div>
 
 </body>
+
 </html>

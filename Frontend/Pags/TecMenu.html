@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HelpOffice - Painel Técnico</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../CSS/Styles_TecMenu.css">
-     <script src="../JS/TecMenu.js" defer></script>
+    <script src="../JS/TecMenu.js" defer></script>
 </head>
+
 <body>
     <!-- Header Section -->
     <header class="header">
@@ -17,40 +19,40 @@
                 HelpOffice
             </div>
         </div>
-        
+
         <div class="user-info">
-            <div class="user-avatar">AS</div>
-            <div class="user-name">Ana Silva - Técnico TI</div>
-                <a href="../Pags/Relatorio.html" class="report-btn">Relatório</a>
+            <div class="user-avatar" id="user-avatar"></div>
+            <div class="user-name" id="user-name"></div>
+            <a href="../Pags/Relatorio.html" class="report-btn">Relatório</a>
         </div>
     </header>
-    
+
     <!-- Main Content -->
     <div class="container">
         <!-- Dashboard Stats -->
         <div class="stats-container">
             <div class="stat-card open">
                 <div class="stat-icon"><i class="fas fa-ticket-alt"></i></div>
-                <div class="stat-value">18</div>
+                <div class="stat-value" id="open-tickets">0</div>
                 <div class="stat-label">Chamados Abertos</div>
             </div>
             <div class="stat-card progress">
                 <div class="stat-icon"><i class="fas fa-tools"></i></div>
-                <div class="stat-value">12</div>
+                <div class="stat-value" id="progress-tickets">0</div>
                 <div class="stat-label">Em Andamento</div>
             </div>
             <div class="stat-card resolved">
                 <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                <div class="stat-value">42</div>
+                <div class="stat-value" id="resolved-tickets">0</div>
                 <div class="stat-label">Resolvidos (7 dias)</div>
             </div>
             <div class="stat-card overdue">
                 <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
-                <div class="stat-value">3</div>
+                <div class="stat-value" id="overdue-tickets">0</div>
                 <div class="stat-label">Atrasados</div>
             </div>
         </div>
-        
+
         <!-- Main Content Area -->
         <div class="content-area">
             <!-- Edit Panel (Left Side) -->
@@ -59,59 +61,55 @@
                     <h3 class="edit-panel-title">Editar Chamado</h3>
                     <button class="close-edit">&times;</button>
                 </div>
-                
+
                 <form id="edit-ticket-form">
                     <div class="form-group">
                         <label class="form-label">Título</label>
-                        <input type="text" class="form-input" id="edit-title" value="Wi-Fi do Financeiro está lento">
+                        <input type="text" class="form-input" id="edit-title" required>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Prioridade</label>
-                            <select class="form-select" id="edit-priority">
-                                <option value="high">Alta</option>
-                                <option value="medium">Média</option>
-                                <option value="low">Baixa</option>
+                            <select class="form-select" id="edit-priority" required>
+                                <option value="ALTA">Alta</option>
+                                <option value="MEDIA">Média</option>
+                                <option value="BAIXA">Baixa</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label class="form-label">Status</label>
-                            <select class="form-select" id="edit-status">
-                                <option value="open">Aberto</option>
-                                <option value="progress">Em Andamento</option>
-                                <option value="resolved">Resolvido</option>
-                                <option value="overdue">Atrasado</option>
+                            <select class="form-select" id="edit-status" required>
+                                <option value="ABERTO">Aberto</option>
+                                <option value="EM_ANDAMENTO">Em Andamento</option>
+                                <option value="RESOLVIDO">Resolvido</option>
+                                <option value="ATRASO">Atrasado</option>
+                                <option value="CANCELADO">Cancelado</option>
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label">Técnico Responsável</label>
-                        <select class="form-select" id="edit-technician">
+                        <select class="form-select" id="edit-technician" required>
                             <option value="">- Selecionar -</option>
-                            <option value="as" selected>Ana Silva</option>
-                            <option value="co">Carlos Oliveira</option>
-                            <option value="ps">Pedro Santos</option>
+                            <!-- Técnicos serão carregados dinamicamente -->
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label">Departamento</label>
-                        <select class="form-select" id="edit-department">
-                            <option value="ti" selected>TI</option>
-                            <option value="rh">RH</option>
-                            <option value="fin">Financeiro</option>
-                            <option value="ops">Operações</option>
+                        <select class="form-select" id="edit-department" required>
+                            <!-- Departamentos serão carregados dinamicamente -->
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label">Descrição</label>
-                        <textarea class="form-textarea" id="edit-description">Desde ontem à tarde, a conexão Wi-Fi no setor financeiro está extremamente lenta, dificultando o acesso aos sistemas. Vários computadores apresentam o mesmo problema. Já tentei reiniciar o roteador, mas o problema persiste.</textarea>
+                        <textarea class="form-textarea" id="edit-description" required></textarea>
                     </div>
-                    
+
                     <div class="form-actions">
                         <button type="submit" class="btn">
                             <i class="fas fa-save"></i> Salvar Alterações
@@ -122,23 +120,30 @@
                     </div>
                 </form>
             </div>
-            
+
             <!-- Table Section (Right Side) -->
             <div class="table-section">
                 <div class="section-header">
                     <h2 class="section-title"><i class="fas fa-tasks"></i> Gerenciar Chamados</h2>
                     <div class="search-filter">
-                        <input type="text" class="search-box" placeholder="Buscar Chamado...">
-                        <select class="filter-select">
-                            <option>Todos os Status</option>
-                            <option>Aberto</option>
-                            <option>Em Andamento</option>
-                            <option>Resolvido</option>
-                            <option>Atrasado</option>
+                        <input type="text" class="search-box" placeholder="Buscar Chamado..." id="search-box">
+                        <select class="filter-select" id="status-filter">
+                            <option value="all">Todos os Status</option>
+                            <option value="ABERTO">Aberto</option>
+                            <option value="EM_ANDAMENTO">Em Andamento</option>
+                            <option value="RESOLVIDO">Resolvido</option>
+                            <option value="ATRASO">Atrasado</option>
+                            <option value="CANCELADO">Cancelado</option>
+                        </select>
+                        <select class="filter-select" id="priority-filter">
+                            <option value="all">Todas Prioridades</option>
+                            <option value="ALTA">Alta</option>
+                            <option value="MEDIA">Média</option>
+                            <option value="BAIXA">Baixa</option>
                         </select>
                     </div>
                 </div>
-                
+
                 <table>
                     <thead>
                         <tr>
@@ -147,206 +152,63 @@
                             <th>Departamento</th>
                             <th>Prioridade</th>
                             <th>Status</th>
-                            <th>Técnico</th>
-                            <th>Data</th>
+                            <th>Solicitante</th>
+                            <th>Data Abertura</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>#1025</td>
-                            <td>Problema com impressora no setor RH</td>
-                            <td>RH</td>
-                            <td><span class="priority-badge priority-high">Alta</span></td>
-                            <td><span class="status-badge status-progress">Em Andamento</span></td>
-                            <td>
-                                <div class="tech-info">
-                                    <span class="tech-badge"><i class="fas fa-user"></i> Ana Silva</span>
-                                </div>
-                            </td>
-                            <td>02/06/2025</td>
-                            <td>
-                                <div class="actions-container">
-                                    <button class="action-btn assign-btn" title="Atribuir técnico" data-id="1025">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                    <button class="action-btn view-btn" title="Visualizar" data-id="1025">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#1024</td>
-                            <td>Wi-Fi do Financeiro está lento</td>
-                            <td>TI</td>
-                            <td><span class="priority-badge priority-high">Alta</span></td>
-                            <td><span class="status-badge status-open">Aberto</span></td>
-                            <td>
-                                <div class="tech-info">
-                                    <span class="tech-badge"><i class="fas fa-plus-circle"></i> Sem técnico</span>
-                                </div>
-                            </td>
-                            <td>02/06/2025</td>
-                            <td>
-                                <div class="actions-container">
-                                    <button class="action-btn assign-btn" title="Atribuir técnico" data-id="1024">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                    <button class="action-btn view-btn" title="Visualizar" data-id="1024">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#1022</td>
-                            <td>Problema com acesso ao servidor</td>
-                            <td>TI</td>
-                            <td><span class="priority-badge priority-high">Alta</span></td>
-                            <td><span class="status-badge status-resolved">Resolvido</span></td>
-                            <td>
-                                <div class="tech-info">
-                                    <span class="tech-badge"><i class="fas fa-user"></i> Carlos Oliveira</span>
-                                </div>
-                            </td>
-                            <td>01/06/2025</td>
-                            <td>
-                                <div class="actions-container">
-                                    <button class="action-btn assign-btn" title="Atribuir técnico" data-id="1022">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                    <button class="action-btn view-btn" title="Visualizar" data-id="1022">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#1019</td>
-                            <td>Teclado não funciona</td>
-                            <td>Operações</td>
-                            <td><span class="priority-badge priority-low">Baixa</span></td>
-                            <td><span class="status-badge status-resolved">Resolvido</span></td>
-                            <td>
-                                <div class="tech-info">
-                                    <span class="tech-badge"><i class="fas fa-user"></i> Pedro Santos</span>
-                                </div>
-                            </td>
-                            <td>31/05/2025</td>
-                            <td>
-                                <div class="actions-container">
-                                    <button class="action-btn assign-btn" title="Atribuir técnico" data-id="1019">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                    <button class="action-btn view-btn" title="Visualizar" data-id="1019">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
+                    <tbody id="tickets-table-body">
+                        <!-- Chamados serão carregados dinamicamente aqui -->
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-    
+
     <!-- Modal de Detalhes do Chamado -->
     <div class="modal" id="ticket-modal">
         <div class="modal-content">
             <div class="modal-header">
                 <button class="close-modal">&times;</button>
-                <h2 class="ticket-title">Wi-Fi do Financeiro está lento</h2>
+                <h2 class="ticket-title" id="modal-ticket-title"></h2>
                 <div class="ticket-meta">
-                    <span class="ticket-id">#1024</span>
-                    <span>Departamento: TI</span>
-                    <span>Aberto por: João Dias (RH)</span>
-                    <span>Data: 02/06/2025</span>
+                    <span class="ticket-id" id="modal-ticket-id"></span>
+                    <span id="modal-ticket-department"></span>
+                    <span id="modal-ticket-author"></span>
+                    <span id="modal-ticket-date"></span>
                 </div>
             </div>
-            
+
             <div class="modal-body">
                 <h3 class="section-divider"><i class="fas fa-file-alt"></i> Descrição</h3>
-                <div class="ticket-description">
-                    Desde ontem à tarde, a conexão Wi-Fi no setor financeiro está extremamente lenta, dificultando o acesso aos sistemas. Vários computadores apresentam o mesmo problema. Já tentei reiniciar o roteador, mas o problema persiste.
-                </div>
-                
+                <div class="ticket-description" id="modal-ticket-description"></div>
+
                 <h3 class="section-divider"><i class="fas fa-paperclip"></i> Anexos</h3>
-                <div class="attachments">
-                    <div class="attachment-item">
-                        <i class="fas fa-file-image fa-3x" style="color: #6c757d;"></i>
-                    </div>
-                    <div class="attachment-item">
-                        <span>velocidade-teste.png</span>
-                    </div>
+                <div class="attachments" id="modal-ticket-attachments">
+                    <!-- Anexos serão carregados dinamicamente -->
                 </div>
-                
+
                 <h3 class="section-divider"><i class="fas fa-history"></i> Histórico do Chamado</h3>
-                <div class="history-container">
-                    <div class="history-item">
-                        <div class="history-avatar">JD</div>
-                        <div class="history-content">
-                            <div class="history-header">
-                                <div>
-                                    <span class="history-user">João Dias</span>
-                                    <span class="history-role">(RH)</span>
-                                </div>
-                                <span class="history-date">02/06/2025 09:15</span>
-                            </div>
-                            <div class="history-message">
-                                Chamado aberto: Wi-Fi do Financeiro está lento
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="history-item">
-                        <div class="history-avatar">AS</div>
-                        <div class="history-content">
-                            <div class="history-header">
-                                <div>
-                                    <span class="history-user">Ana Silva</span>
-                                    <span class="history-role">(Técnico TI)</span>
-                                </div>
-                                <span class="history-date">02/06/2025 10:30</span>
-                            </div>
-                            <div class="history-message">
-                                Atribuído para mim. Vou verificar o roteador do setor financeiro. Por favor, informe se todos os computadores estão com problema ou apenas alguns.
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="history-item">
-                        <div class="history-avatar">JD</div>
-                        <div class="history-content">
-                            <div class="history-header">
-                                <div>
-                                    <span class="history-user">João Dias</span>
-                                    <span class="history-role">(RH)</span>
-                                </div>
-                                <span class="history-date">02/06/2025 11:05</span>
-                            </div>
-                            <div class="history-message">
-                                Segundo a equipe do financeiro, todos os computadores estão com o mesmo problema de lentidão.
-                            </div>
-                        </div>
-                    </div>
+                <div class="history-container" id="modal-ticket-history">
+                    <!-- Histórico será carregado dinamicamente -->
                 </div>
-                
+
                 <h3 class="section-divider"><i class="fas fa-comment-alt"></i> Adicionar Comentário</h3>
-                <form class="comment-form">
-                    <textarea class="comment-input" placeholder="Digite seu comentário aqui..."></textarea>
+                <form class="comment-form" id="comment-form">
+                    <textarea class="comment-input" id="comment-input" placeholder="Digite seu comentário aqui..."
+                        required></textarea>
                     <div class="action-bar">
                         <div class="ticket-status-info">
                             <div class="status-info-item">
                                 <span class="status-label">Prioridade:</span>
-                                <span class="status-value status-priority">Alta</span>
+                                <span class="status-value" id="modal-ticket-priority"></span>
                             </div>
                             <div class="status-info-item">
                                 <span class="status-label">Status:</span>
-                                <span class="status-value status-open">Aberto</span>
+                                <span class="status-value" id="modal-ticket-status"></span>
                             </div>
                         </div>
-                        
+
                         <div class="modal-buttons">
                             <button type="button" class="btn btn-success" id="resolve-btn">
                                 <i class="fas fa-check"></i> Marcar como Resolvido
@@ -360,7 +222,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Modal de Atribuição de Técnico -->
     <div class="assign-modal" id="assign-modal">
         <div class="assign-content">
@@ -369,12 +231,10 @@
                 <button class="close-assign">&times;</button>
             </div>
             <div class="assign-form">
-                <p>Selecione o técnico para o chamado <strong id="assign-ticket-id">#1024</strong></p>
-                <select class="assign-select" id="assign-technician">
+                <p>Selecione o técnico para o chamado <strong id="assign-ticket-id"></strong></p>
+                <select class="assign-select" id="assign-technician" required>
                     <option value="">- Selecionar -</option>
-                    <option value="as">Ana Silva</option>
-                    <option value="co">Carlos Oliveira</option>
-                    <option value="ps">Pedro Santos</option>
+                    <!-- Técnicos serão carregados dinamicamente -->
                 </select>
             </div>
             <div class="assign-actions">
@@ -383,13 +243,12 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Footer -->
     <footer class="footer">
         <div>&copy; 2025 HelpOffice - Todos os direitos reservados</div>
         <div class="slogan">Nada se perde, tudo se resolve.</div>
     </footer>
-    
-    
 </body>
+
 </html>

@@ -1,6 +1,12 @@
 spring:
   application:
     name: apihelpdesk
+  rabbitmq:
+    addresses: amqps://azlgtuxj:HjCUvOPEQhfZBZj-0rVZ_oQFB5ekeDVd@seal.lmq.cloudamqp.com/azlgtuxj
+    ssl:
+      enabled: true
+    queue:
+      name: default.email
   servlet:
     multipart:
       enabled: true

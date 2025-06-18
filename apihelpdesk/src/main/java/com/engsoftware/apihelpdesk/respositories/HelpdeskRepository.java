@@ -16,5 +16,7 @@ public interface HelpdeskRepository extends JpaRepository<HelpdeskModel, UUID> {
     List<HelpdeskModel> findByEmailResponsavelTI(String emailResponsavel);
     long countByStatus(Status status);
     long countBySetor(Setor setor);
+    Long countBySetorAndStatus(Setor setor, Status aberto);
+    List<HelpdeskModel> findByStatus(Status resolvido);
 
 }
