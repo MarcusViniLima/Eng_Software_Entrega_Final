@@ -18,7 +18,7 @@ import jakarta.transaction.Transactional;
 @Service
 public class UserService {
 
-     @Autowired
+    @Autowired
     private UserRepository userRepository;
     @Autowired
     private WebSecurityConfig webSecurityConfig;
@@ -43,26 +43,21 @@ public class UserService {
     }
 
     public String login(AuthenticationResponse user) throws Exception {
-        if(user == null){
+        if (user == null) {
             throw new NullPointerException("User cannot be null");
         }
         if (!userRepository.existsByEmail(user.getEmail())) {
             throw new Exception(String.format("Email '%s' não cadastrado", user.getEmail()));
         }
         try {
-            System.out.println("User seller encontrado: "+user.getEmail());
+            System.out.println("Tentando autenticar: " + user.getEmail());
             var usernamePassword = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
             var auth = authenticationManager.authenticate(usernamePassword);
 
-            if (auth.getPrincipal() instanceof UserDetails) {
-                var principal = (UserDetails) auth.getPrincipal();
-                return jwtService.generateToken(principal);
-            } else {
-                throw new Exception("Erro ao autenticar usuário");
-            }
-
+            var principal = (UserDetails) auth.getPrincipal();
+            return jwtService.generateToken(principal);
         } catch (Exception e) {
-            throw new Exception("Erro ao fazer login do usuário", e);
+            throw new Exception("Erro ao autenticar usuário: " + e.getMessage());
         }
     }
 

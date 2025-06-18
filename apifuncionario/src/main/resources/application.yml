@@ -2,11 +2,11 @@ spring:
   application:
     name: apifuncionario
   rabbitmq:
-    addresses: amqps://azlgtuxj:HjCUvOPEQhfZBZj-0rVZ_oQFB5ekeDVd@seal.lmq.cloudamqp.com/azlgtuxj
+    addresses: amqps://ccjbjzmx:idmacF-ew_qwXdDNE3oCPYxqrDiIC-yH@seal.lmq.cloudamqp.com/ccjbjzmx
     ssl:
       enabled: true
     queue:
-      name: default.security
+      name: default.seguranca
   datasource:
     url: jdbc:mysql://localhost:3306/ms_funcionario
     username: root

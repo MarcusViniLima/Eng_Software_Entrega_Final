@@ -28,12 +28,12 @@ spring:
         
         # Nova Rota para API de Email
         - id: apiemail
-          uri: lb://apiemail  # Nome EXATO registrado no Eureka
+          uri: lb://apiemail   
           predicates:
             - Path=/email/**
 
 server:
-  port: 0
+  port: 8082
   
 eureka:
   client:

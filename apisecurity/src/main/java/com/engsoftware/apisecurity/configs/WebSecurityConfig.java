@@ -1,5 +1,6 @@
 package com.engsoftware.apisecurity.configs;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,18 +33,25 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://127.0.0.1:5500"));
-                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    config.setAllowedHeaders(List.of("*"));
-                    config.setAllowCredentials(true);
-                    return config;
-                }))
+                CorsConfiguration config = new CorsConfiguration();
+                // Use setAllowedOrigin em vez de setAllowedOrigins para um único valor
+                config.setAllowedOrigins(Arrays.asList(
+                    "http://127.0.0.1:5500", 
+                    "http://localhost:5500",
+                    "chrome-extension://postman" // Para testes com Postman
+                ));
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedHeaders(List.of("*"));
+                config.setAllowCredentials(true);
+                config.setExposedHeaders(List.of("Authorization"));
+                return config;
+            }))
                 .csrf(csfr -> csfr.disable())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/funcionario/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(

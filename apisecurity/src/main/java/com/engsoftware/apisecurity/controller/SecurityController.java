@@ -1,5 +1,8 @@
 package com.engsoftware.apisecurity.controller;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.engsoftware.apisecurity.dtos.AuthenticationResponse;
 import com.engsoftware.apisecurity.service.UserService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
@@ -25,9 +30,9 @@ public class SecurityController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login( @RequestBody AuthenticationResponse user) throws Exception {
-        String userLogin= userService.login(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userLogin);
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody AuthenticationResponse user) throws Exception {
+        String token = userService.login(user);
+        return ResponseEntity.ok(Collections.singletonMap("token", token));
     }
 
 }

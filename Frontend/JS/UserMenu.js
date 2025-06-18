@@ -1,7 +1,7 @@
 // =====================================================
 // CONFIGURAÇÕES DA API
 // =====================================================
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'http://localhost:8082';
 const TICKETS_ENDPOINT = '/helpdesk';
 
 // Elementos DOM

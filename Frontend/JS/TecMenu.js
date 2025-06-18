@@ -1,7 +1,7 @@
 // =====================================================
 // CONFIGURAÇÕES DA API - ESSENCIAIS PARA A INTEGRAÇÃO
 // =====================================================
-const API_BASE_URL = 'http://localhost:8080'; // URL base do backend Java
+const API_BASE_URL = 'http://localhost:8082'; // URL base do backend Java
 const TICKETS_ENDPOINT = '/helpdesk';
 const TECHNICIANS_ENDPOINT = '/helpdesk/tecnicos'; // Ajuste conforme sua API real
 const STATS_ENDPOINT = '/helpdesk/contagem/status';

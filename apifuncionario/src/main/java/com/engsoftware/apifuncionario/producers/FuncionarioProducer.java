@@ -28,6 +28,7 @@ public class FuncionarioProducer {
             AuthenticationResponse.setAcessLevel("user");
         }
         rabbitTemplate.convertAndSend("",routingKey, AuthenticationResponse);
+        System.out.println("Message sent");
     }
 
 }

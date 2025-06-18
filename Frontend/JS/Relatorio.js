@@ -1,7 +1,7 @@
 // ==============================================
 // CONFIGURAÇÃO DA API
 // ==============================================
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'http://localhost:8082';
 const ENDPOINTS = {
     SUMMARY: '/helpdesk/contagem/status',
     BY_STATUS: '/helpdesk/contagem/status',

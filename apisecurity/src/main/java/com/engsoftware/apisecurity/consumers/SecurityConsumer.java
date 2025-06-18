@@ -16,7 +16,13 @@ public class SecurityConsumer {
 
     @RabbitListener(queues = "${spring.rabbitmq.queue.name}")
     public void rlistenSecurityQueue(@Payload AuthenticationRegister authenticationRegister) throws Exception {
-        userService.save(authenticationRegister);
+        try {
+            userService.save(authenticationRegister);
+            System.out.println("Mensagem recebida e processada: " + authenticationRegister);
+        } catch (Exception e) {
+            System.err.println("Erro ao processar mensagem: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 }
