@@ -17,7 +17,6 @@ public class SecurityConsumer {
     @RabbitListener(queues = "${spring.rabbitmq.queue.name}")
     public void rlistenSecurityQueue(@Payload AuthenticationRegister authenticationRegister) throws Exception {
         userService.save(authenticationRegister);
-        System.out.println("Received message: " + authenticationRegister.getEmail());
     }
 
 }

@@ -1,0 +1,42 @@
+# Estágio de construção (Maven)
+FROM maven:3.8.6-eclipse-temurin-17 as builder
+
+WORKDIR /app
+
+# Copiar apenas os arquivos necessários para o Maven resolver dependências
+COPY pom.xml .
+COPY src src
+
+# Baixar dependências e construir o projeto
+RUN mvn dependency:go-offline
+RUN mvn clean package -DskipTests
+
+# Estágio de produção (JRE apenas)
+FROM eclipse-temurin:17-jre-jammy
+
+WORKDIR /app
+
+# Copiar o JAR construído
+COPY --from=builder /app/target/*.jar app.jar
+
+# Porta exposta (ajuste conforme necessário)
+EXPOSE 8080
+
+# Variáveis de ambiente (substitua os valores)
+ENV SPRING_RABBITMQ_ADDRESSES=amqps://azlgtuxj:HjCUvOPEQhfZBZj-0rVZ_oQFB5ekeDVd@seal.lmq.cloudamqp.com/azlgtuxj
+ENV SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/ms_email
+ENV SPRING_DATASOURCE_USERNAME=root
+ENV SPRING_DATASOURCE_PASSWORD=1234
+ENV SPRING_MAIL_HOST=smtp.gmail.com
+ENV SPRING_MAIL_PORT=587
+ENV SPRING_MAIL_USERNAME=Helpoffice2025@gmail.com
+ENV SPRING_MAIL_PASSWORD=cidhtjhwluzohsbw
+ENV EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+ENV SPRING_PROFILES_ACTIVE=prod
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# Comando de execução
+ENTRYPOINT ["java", "-jar", "app.jar"]
