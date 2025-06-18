@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.engsoftware.apihelpdesk.models.HelpdeskModel;
 import com.engsoftware.apihelpdesk.models.enums.Setor;
 import com.engsoftware.apihelpdesk.models.enums.Status;
+import com.engsoftware.apihelpdesk.producers.HelpdeskProducer;
 import com.engsoftware.apihelpdesk.respositories.HelpdeskRepository;
 
 @Service
@@ -17,11 +18,15 @@ public class HelpdeskService {
 
     @Autowired
     private HelpdeskRepository helpdeskRepository;
+    @Autowired
+    private HelpdeskProducer helpdeskProducer;
 
     public HelpdeskModel save(HelpdeskModel helpdeskModel) {
         if (helpdeskModel.getDataAbertura() == null) {
             helpdeskModel.setDataAbertura(LocalDateTime.now());
         }
+
+        helpdeskProducer.publishMessageEmail(helpdeskModel);
         return helpdeskRepository.save(helpdeskModel);
     }
 

@@ -1,6 +1,17 @@
 spring:
   application:
     name: apiemail
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: Helpoffice2025@gmail.com
+    password: cidh tjhw luzo hsbw
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   rabbitmq:
     addresses: amqps://azlgtuxj:HjCUvOPEQhfZBZj-0rVZ_oQFB5ekeDVd@seal.lmq.cloudamqp.com/azlgtuxj
     ssl:
@@ -29,4 +40,3 @@ eureka:
       defaultZone: http://localhost:8761/eureka    
   instance:
     instanceId: ${spring.application.name}:${application.instance_id:${random.value}}
-
