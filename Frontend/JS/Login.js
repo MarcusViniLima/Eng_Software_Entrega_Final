@@ -1,7 +1,7 @@
 // =====================================================
 // CONFIGURAÇÕES DA API - ATUALIZADAS
 // =====================================================
-const API_BASE_URL = 'http://Localhost:8080'; // URL base do backend Java
+const API_BASE_URL = 'http://localhost:8080'; // URL base do backend Java
 const LOGIN_ENDPOINT = '/auth/login';          // Endpoint para autenticação
 const REGISTER_ENDPOINT = '/funcionario';      // Endpoint para cadastro de funcionários
 
@@ -59,7 +59,7 @@ function switchTab(tabName) {
 }
 
 // =====================================================
-// FUNÇÕES DE COMUNICAÇÃO COM A API (BACKEND JAVA)
+// FUNÇÕES DE COMUNICAÇÃO COM A API (BACKEND JAVA) - ATUALIZADAS
 // =====================================================
 
 /**
@@ -69,11 +69,7 @@ function switchTab(tabName) {
  */
 async function loginUser(email, senha) {
     try {
-        // URL completa corrigida
-        const url = API_BASE_URL + LOGIN_ENDPOINT;
-        
-        // Executa a requisição com os campos corretos
-        const response = await fetch(url, {
+        const response = await fetch(API_BASE_URL + LOGIN_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -84,21 +80,27 @@ async function loginUser(email, senha) {
             })
         });
 
-        // Tratamento de erros
+        // Verifica se a resposta não foi bem sucedida
         if (!response.ok) {
             // Tenta extrair mensagem de erro
             let errorMsg = 'Erro na autenticação';
             try {
+                const errorData = await response.json();
+                errorMsg = errorData.error || errorData.message || errorMsg;
+            } catch (e) {
                 const errorText = await response.text();
                 errorMsg = errorText || errorMsg;
-            } catch (e) {
-                console.warn('Não foi possível ler corpo do erro', e);
             }
             throw new Error(errorMsg);
         }
 
-        // Extrai o token da resposta (é texto, não JSON)
-        const token = await response.text();
+        // Extrai o token da resposta (agora em JSON)
+        const data = await response.json();
+        const token = data.token;
+        
+        if (!token) {
+            throw new Error('Token não recebido na resposta');
+        }
         
         // Armazena o token
         localStorage.setItem('authToken', token);
@@ -119,10 +121,7 @@ async function loginUser(email, senha) {
  */
 async function registerUser(userData) {
     try {
-        // URL completa para cadastro
-        const url = API_BASE_URL + REGISTER_ENDPOINT;
-        
-        const response = await fetch(url, {
+        const response = await fetch(API_BASE_URL + REGISTER_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -134,10 +133,11 @@ async function registerUser(userData) {
         if (!response.ok) {
             let errorMsg = 'Erro ao criar conta';
             try {
+                const errorData = await response.json();
+                errorMsg = errorData.error || errorData.message || errorMsg;
+            } catch (e) {
                 const errorText = await response.text();
                 errorMsg = errorText || errorMsg;
-            } catch (e) {
-                console.warn('Não foi possível ler corpo do erro', e);
             }
             throw new Error(errorMsg);
         }
@@ -156,7 +156,7 @@ async function registerUser(userData) {
 }
 
 // =====================================================
-// EVENTOS DE SUBMIT DOS FORMULÁRIOS
+// EVENTOS DE SUBMIT DOS FORMULÁRIOS - ATUALIZADOS
 // =====================================================
 
 // Formulário de Login
@@ -197,11 +197,24 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
         return;
     }
     
+    // Mapeamento dos departamentos para valores esperados pelo backend
+    const departmentMapping = {
+        'ti': 'TI',
+        'rh': 'RH',
+        'financeiro': 'FINANCEIRO',
+        'vendas': 'VENDAS',
+        'marketing': 'MARKETING',
+        'operacoes': 'OPERACOES'
+    };
+
+    // Obtém o valor mapeado ou usa o valor original se não estiver no mapeamento
+    const mappedDepartment = departmentMapping[department.toLowerCase()] || department.toUpperCase();
+    
     // Preparar os dados no formato esperado pelo Java (FuncionarioModel)
     const userData = {
         nome: name,
         email: email,
-        departamento: department,
+        departamento: mappedDepartment, // Usa o valor mapeado
         senha: password
     };
     
