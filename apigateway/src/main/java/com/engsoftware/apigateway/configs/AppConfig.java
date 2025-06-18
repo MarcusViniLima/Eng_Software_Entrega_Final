@@ -19,7 +19,7 @@ public class AppConfig {
         return new CorsWebFilter(exchange -> {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowCredentials(true);
-            config.addAllowedOrigin("http://localhost:3000");
+            config.addAllowedOrigin("http://127.0.0.1:5500");
             config.addAllowedHeader("*");
             config.addAllowedMethod("*");
             config.setMaxAge(3600L);

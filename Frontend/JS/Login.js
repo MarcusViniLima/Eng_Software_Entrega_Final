@@ -1,7 +1,7 @@
 // =====================================================
 // CONFIGURAÇÕES DA API - ATUALIZADAS
 // =====================================================
-const API_BASE_URL = 'http://Localhost:8080'; // URL base do backend Java
+const API_BASE_URL = 'http://localhost:8080'; // URL base do backend Java
 const LOGIN_ENDPOINT = '/auth/login';          // Endpoint para autenticação
 const REGISTER_ENDPOINT = '/funcionario';      // Endpoint para cadastro de funcionários
 
