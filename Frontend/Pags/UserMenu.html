@@ -1,74 +1,76 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HelpOffice - Sistema de Chamados</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../JS/UserMenu.js" defer></script>
     <link rel="stylesheet" href="../CSS/Styles_UserMenu.css">
-    <link rel="script" href="../JS/UserMenu.js">
 </head>
-
 <body>
     <!-- Header Section -->
     <header class="header">
         <div class="brand">
             <div class="brand-name">HelpOffice</div>
         </div>
-
+        
         <div class="user-info">
-            <div class="user-avatar" id="user-avatar"></div>
-            <div class="user-name" id="user-name"></div>
+            <div class="user-avatar">GO</div>
+            <div class="user-name">Guilherme Ornellas</div>
         </div>
     </header>
-
+    
     <!-- Main Content -->
     <div class="container">
         <!-- New Ticket Section -->
         <div class="card">
             <h2 class="card-title"><i class="fas fa-plus-circle"></i> Abrir um novo chamado</h2>
-
+            
             <form id="ticket-form">
                 <div class="form-group">
-                    <label for="ticket-title">Título do Chamado</label>
-                    <input type="text" id="ticket-title" class="form-control" placeholder="Ex: Wi-Fi do Financeiro está lento" required>
+                    <label for="ticket-title">Título do Chamado*</label>
+                    <input type="text" id="ticket-title" class="form-control" placeholder="Ex: Wi-Fi do Financeiro está lento">
                 </div>
-
+                
                 <div class="form-group">
-                    <label for="department">Departamento</label>
-                    <select id="department" class="form-control" required>
+                    <label for="department">Departamento*</label>
+                    <select id="department" class="form-control">
                         <option value="">Selecione um departamento</option>
-                        <!-- Opções serão preenchidas dinamicamente -->
+                        <option value="TI">TI</option>
+                        <option value="RH">Recursos Humanos</option>
+                        <option value="Financeiro">Financeiro</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Vendas">Vendas</option>
                     </select>
                 </div>
-
+                
                 <div class="form-group">
-                    <label>Prioridade</label>
+                    <label>Prioridade*</label>
                     <div class="priority-group">
-                        <div class="priority-option high-priority" data-priority="ALTA">
+                        <div class="priority-option high-priority" data-priority="high">
                             <div class="priority-icon"><i class="fas fa-exclamation-circle"></i></div>
                             <div class="priority-name">Alta</div>
                         </div>
-                        <div class="priority-option medium-priority" data-priority="MEDIA">
+                        <div class="priority-option medium-priority" data-priority="medium">
                             <div class="priority-icon"><i class="fas fa-exclamation-triangle"></i></div>
                             <div class="priority-name">Média</div>
                         </div>
-                        <div class="priority-option low-priority" data-priority="BAIXA">
+                        <div class="priority-option low-priority" data-priority="low">
                             <div class="priority-icon"><i class="fas fa-info-circle"></i></div>
                             <div class="priority-name">Baixa</div>
                         </div>
                     </div>
-                    <input type="hidden" id="priority" value="" required>
+                    <input type="hidden" id="priority" value="">
                 </div>
-
+                
                 <div class="form-group">
-                    <label for="description">Descrição do Problema</label>
-                    <textarea id="description" class="form-control" placeholder="Descreva detalhadamente o problema encontrado..." required></textarea>
+                    <label for="description">Descrição do Problema*</label>
+                    <textarea id="description" class="form-control" placeholder="Descreva detalhadamente o problema encontrado..."></textarea>
                 </div>
-
+                
                 <div class="form-group">
-                    <label>Anexar Arquivo (Opcional)</label>
+                    <label>Anexar Imagem (Opcional)</label>
                     <div class="file-upload" id="file-upload">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <div class="file-text">Arraste e solte ou clique para selecionar</div>
@@ -76,89 +78,102 @@
                     </div>
                     <input type="file" id="file-input" style="display: none;">
                 </div>
-
+                
                 <button type="submit" class="btn">Abrir Chamado</button>
             </form>
         </div>
-
+        
         <!-- Tickets Section -->
         <div>
             <h2 class="card-title"><i class="fas fa-ticket-alt"></i> Meus Chamados</h2>
-            <div id="tickets-container">
-                <!-- Chamados serão carregados dinamicamente aqui -->
+            
+            <div class="tickets-container" id="tickets-container">
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>Você ainda não abriu nenhum chamado</p>
+                </div>
             </div>
         </div>
     </div>
-
+    
     <!-- Ticket Modal -->
     <div id="ticket-modal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
-
+            
             <div class="modal-header">
-                <h2 id="modal-title"></h2>
+                <h2 id="modal-title">Wi-Fi do Financeiro está lento</h2>
                 <div class="ticket-info">
-                    <span class="ticket-id" id="modal-id"></span>
-                    <span class="ticket-priority" id="modal-priority"></span>
-                    <span class="ticket-status" id="modal-status"></span>
+                    <span class="ticket-id" id="modal-id">#1024</span>
+                    <span class="ticket-priority high" id="modal-priority">Alta Prioridade</span>
+                    <span class="ticket-status open" id="modal-status">Aberto</span>
                 </div>
             </div>
-
+            
             <div class="ticket-details">
                 <div class="detail-item">
                     <strong>Departamento:</strong>
-                    <span id="modal-department"></span>
+                    <span id="modal-department">TI</span>
                 </div>
-
+                
                 <div class="detail-item">
                     <strong>Aberto por:</strong>
-                    <span id="modal-author"></span>
+                    <span id="modal-author">Guilherme Ornellas (TI)</span>
                 </div>
-
+                
                 <div class="detail-item">
                     <strong>Data:</strong>
-                    <span id="modal-date"></span>
+                    <span id="modal-date">02/06/2025</span>
                 </div>
-
+                
                 <div class="detail-item">
                     <strong>Descrição:</strong>
-                    <p id="modal-description"></p>
+                    <p id="modal-description">Desde ontem à tarde, a conexão Wi-Fi no setor financeiro está extremamente lenta, dificultando o acesso aos sistemas.</p>
                 </div>
-
+                
                 <div class="detail-item">
                     <strong>Anexos:</strong>
                     <div class="attachments" id="modal-attachments">
-                        <!-- Anexos serão carregados dinamicamente -->
+                        <div class="no-attachments">Nenhum anexo disponível</div>
                     </div>
                 </div>
             </div>
-
-            <div class="ticket-history">
+            
+            <div class="ticket-history" id="ticket-history">
                 <h3>Histórico do Chamado</h3>
-                <div id="history-container">
-                    <!-- Histórico será carregado dinamicamente -->
+                
+                <div class="history-item">
+                    <div class="history-author">Você</div>
+                    <div class="history-content">Chamado aberto</div>
+                    <div class="history-time" id="history-time">02/06/2025 09:15</div>
                 </div>
             </div>
-
+            
             <div class="chat-input">
                 <textarea id="comment-input" placeholder="Digite sua mensagem para o técnico..."></textarea>
-                <button class="btn" id="send-comment">Enviar</button>
+                <button id="send-comment" class="btn">Enviar</button>
             </div>
-
+            
             <div class="modal-footer">
-                <button class="btn btn-outline" id="close-ticket">Fechar Chamado</button>
-                <button class="btn" id="add-comment">Adicionar Comentário</button>
+                <button id="close-ticket" class="btn btn-outline">Fechar Chamado</button>
+                <button id="add-comment" class="btn">Adicionar Comentário</button>
             </div>
         </div>
     </div>
-
+    
+    <!-- Popup de sucesso no cadastro -->
+    <div id="success-popup" class="popup">
+        <div class="popup-content">
+            <h2>Chamado criado com sucesso!</h2>
+            <p>Seu chamado foi registrado e será atendido em breve.</p>
+            <button id="close-popup" class="btn">OK</button>
+        </div>
+    </div>
+    
     <!-- Footer -->
     <footer class="footer">
         <div>&copy; 2025 HelpOffice - Todos os direitos reservados</div>
         <div class="slogan">Nada se perde, tudo se resolve.</div>
     </footer>
-
-    <script src="../JS/UserMenu.js"></script>
 </body>
-
 </html>

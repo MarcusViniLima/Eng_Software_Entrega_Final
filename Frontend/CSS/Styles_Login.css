@@ -120,8 +120,8 @@
             line-height: 1.2;
             text-align: center;
             position: relative;
-            top: -70px; /* Nome mais elevado */
-            margin-bottom: 20px;
+            top: -50px; /* Nome mais elevado */
+            margin-bottom: 5px;
         }
         
         /* SLOGAN - DENTRO DO CÍRCULO */
@@ -137,7 +137,7 @@
             text-align: center;
             color: white;
             position: absolute;
-            bottom: 60px; /* Slogan mais baixo */
+            bottom: 140px; /* Slogan mais baixo */
             padding: 0 30px;
         }
         

@@ -1,343 +1,187 @@
-// ==============================================
-// CONFIGURAÇÃO DA API
-// ==============================================
-const API_BASE_URL = 'http://localhost:8082';
-const ENDPOINTS = {
-    SUMMARY: '/helpdesk/contagem/status',
-    BY_STATUS: '/helpdesk/contagem/status',
-    BY_DEPARTMENT: '/helpdesk/contagem/setor',
-    BY_TECHNICIAN: '/helpdesk/contagem/tecnico',
-    RESOLUTION_TIME: '/helpdesk/tempo-resolucao',
-    DEPARTMENT_DETAILS: '/helpdesk/status-por-departamento'
-};
-
-// Variáveis globais para os gráficos
-let mainChart;
-let departmentChart;
-
-// ==============================================
-// FUNÇÕES PRINCIPAIS
-// ==============================================
-
-document.addEventListener('DOMContentLoaded', async () => {
-    // Verificar autenticação
-    if (!localStorage.getItem('authToken')) {
-        window.location.href = 'login.html';
-        return;
-    }
-
-    // Inicializar gráficos
-    initializeCharts();
-    
-    // Carregar dados iniciais
-    await loadInitialData();
-    
-    // Configurar eventos
-    setupEventListeners();
-});
-
-async function loadInitialData() {
-    // Carregar departamentos para o seletor
-    await loadDepartments();
-    
-    // Carregar primeiro relatório
-    await loadReportData();
-}
-
-function initializeCharts() {
-    const mainCtx = document.getElementById('main-chart').getContext('2d');
-    const deptCtx = document.getElementById('department-chart').getContext('2d');
-
-    mainChart = new Chart(mainCtx, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Chamados',
-                data: [],
-                backgroundColor: '#6a11cb'
-            }]
+document.addEventListener('DOMContentLoaded', function() {
+    // Dados fictícios para demonstração
+    const demoData = {
+        stats: {
+            total: 142,
+            open: 28,
+            progress: 19,
+            resolved: 92,
+            overdue: 12,
+            efficiency: '87%'
         },
-        options: getChartOptions('Quantidade de Chamados')
+        statusReport: [
+            { category: 'Abertos', count: 28, percentage: '20%' },
+            { category: 'Em Andamento', count: 19, percentage: '13%' },
+            { category: 'Resolvidos', count: 92, percentage: '65%' },
+            { category: 'Atrasados', count: 12, percentage: '8%' }
+        ],
+        departments: [
+            { name: 'TI', open: 8, progress: 5, resolved: 35 },
+            { name: 'RH', open: 5, progress: 3, resolved: 12 },
+            { name: 'Financeiro', open: 7, progress: 4, resolved: 18 },
+            { name: 'Marketing', open: 3, progress: 2, resolved: 8 },
+            { name: 'Operações', open: 5, progress: 5, resolved: 19 }
+        ],
+        technicians: [
+            { name: 'Carlos Souza', total: 42, resolved: 38, avgTime: '2h15m', efficiency: '90%' },
+            { name: 'Ana Santos', total: 38, resolved: 32, avgTime: '2h45m', efficiency: '84%' },
+            { name: 'Pedro Lima', total: 28, resolved: 25, avgTime: '1h50m', efficiency: '89%' },
+            { name: 'Mariana Costa', total: 22, resolved: 18, avgTime: '3h10m', efficiency: '82%' },
+            { name: 'João Silva', total: 12, resolved: 10, avgTime: '2h30m', efficiency: '83%' }
+        ]
+    };
+
+    // Atualizar cartões de estatísticas
+    document.getElementById('total-tickets').textContent = demoData.stats.total;
+    document.getElementById('open-tickets').textContent = demoData.stats.open;
+    document.getElementById('progress-tickets').textContent = demoData.stats.progress;
+    document.getElementById('resolved-tickets').textContent = demoData.stats.resolved;
+    document.getElementById('overdue-tickets').textContent = demoData.stats.overdue;
+    document.getElementById('efficiency-rate').textContent = demoData.stats.efficiency;
+
+    // Atualizar tabela de status
+    const reportData = document.getElementById('report-data');
+    reportData.innerHTML = '';
+    demoData.statusReport.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.category}</td>
+            <td>${item.count}</td>
+            <td>${item.percentage}</td>
+            <td><button class="filter-btn"><i class="fas fa-filter"></i> Filtrar</button></td>
+        `;
+        reportData.appendChild(row);
     });
 
-    departmentChart = new Chart(deptCtx, {
+    // Atualizar tabela de departamentos
+    const departmentData = document.getElementById('department-data');
+    departmentData.innerHTML = '';
+    demoData.departments.forEach(dept => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${dept.name}</td>
+            <td>${dept.open}</td>
+            <td>${dept.progress}</td>
+            <td>${dept.resolved}</td>
+            <td><button class="details-btn"><i class="fas fa-search"></i> Detalhes</button></td>
+        `;
+        departmentData.appendChild(row);
+    });
+
+    // Atualizar tabela de técnicos
+    const technicianData = document.getElementById('technician-data');
+    technicianData.innerHTML = '';
+    demoData.technicians.forEach(tech => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${tech.name}</td>
+            <td>${tech.total}</td>
+            <td>${tech.resolved}</td>
+            <td>${tech.avgTime}</td>
+            <td>${tech.efficiency}</td>
+        `;
+        technicianData.appendChild(row);
+    });
+
+    // Configurar gráfico de departamentos (gráfico de pizza)
+    const deptCtx = document.getElementById('department-chart').getContext('2d');
+    const departmentChart = new Chart(deptCtx, {
         type: 'pie',
         data: {
-            labels: [],
+            labels: demoData.departments.map(d => d.name),
             datasets: [{
-                data: [],
+                data: demoData.departments.map(d => d.open + d.progress + d.resolved),
                 backgroundColor: [
-                    '#6a11cb', '#2575fc', '#2ecc71', '#f39c12', '#e74c3c'
-                ]
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
+                ],
+                borderWidth: 1
             }]
         },
-        options: getChartOptions('Status por Departamento')
-    });
-}
-
-function getChartOptions(title) {
-    return {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'top',
-            },
-            title: {
-                display: true,
-                text: title,
-                font: {
-                    size: 16
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                title: {
+                    display: true,
+                    text: 'Chamados por Departamento',
+                    font: {
+                        size: 16
+                    }
                 }
             }
         }
-    };
-}
-
-async function loadDepartments() {
-    try {
-        // Mapeamento fixo dos departamentos (poderia vir do backend)
-        const departments = [
-            { id: 'TI', name: 'Tecnologia da Informação' },
-            { id: 'RH', name: 'Recursos Humanos' },
-            { id: 'FINANCEIRO', name: 'Financeiro' },
-            { id: 'MARKETING', name: 'Marketing' }
-        ];
-        
-        const selector = document.getElementById('department-chart-selector');
-        
-        selector.innerHTML = departments.map(dept => 
-            `<option value="${dept.id}">${dept.name}</option>`
-        ).join('');
-        
-    } catch (error) {
-        console.error('Erro:', error);
-        showAlert('error', 'Falha ao carregar departamentos');
-    }
-}
-
-async function loadReportData() {
-    const reportType = document.getElementById('report-type').value;
-    const period = document.getElementById('period').value;
-    const params = new URLSearchParams();
-
-    // Adicionar parâmetro de período
-    if (period === 'custom') {
-        params.append('startDate', document.getElementById('start-date').value);
-        params.append('endDate', document.getElementById('end-date').value);
-    } else {
-        params.append('period', translatePeriodToBackend(period));
-    }
-
-    try {
-        let endpoint, response;
-        
-        switch (reportType) {
-            case 'status':
-                endpoint = ENDPOINTS.BY_STATUS;
-                break;
-            case 'department':
-                endpoint = ENDPOINTS.BY_DEPARTMENT;
-                break;
-            case 'technician':
-                endpoint = ENDPOINTS.BY_TECHNICIAN;
-                break;
-            case 'time':
-                endpoint = ENDPOINTS.RESOLUTION_TIME;
-                break;
-            default:
-                endpoint = ENDPOINTS.SUMMARY;
-        }
-
-        response = await fetch(`${API_BASE_URL}${endpoint}?${params.toString()}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-            }
-        });
-
-        if (!response.ok) throw new Error('Erro na requisição');
-
-        const data = await response.json();
-        updateMainReport(data, reportType);
-        
-    } catch (error) {
-        console.error('Erro:', error);
-        showAlert('error', 'Falha ao carregar relatório');
-    }
-}
-
-function updateMainReport(data, reportType) {
-    // Converter os dados do backend para o formato esperado pelo frontend
-    let labels = [];
-    let values = [];
-    
-    if (reportType === 'status') {
-        labels = ['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO', 'ATRASO'];
-        values = labels.map(label => data[label.toLowerCase()] || 0);
-    } else if (reportType === 'department') {
-        labels = Object.keys(data).map(key => key.toUpperCase());
-        values = Object.values(data);
-    } else if (reportType === 'technician') {
-        labels = Object.keys(data);
-        values = Object.values(data);
-    } else if (reportType === 'time') {
-        labels = Object.keys(data);
-        values = Object.values(data).map(hours => parseFloat(hours.toFixed(2)));
-    }
-
-    // Atualizar gráfico principal
-    mainChart.data.labels = labels.map(label => formatLabel(label, reportType));
-    mainChart.data.datasets[0].data = values;
-    mainChart.update();
-
-    // Atualizar tabela
-    const tableBody = document.getElementById('report-data');
-    const total = values.reduce((sum, val) => sum + val, 0);
-    
-    tableBody.innerHTML = labels.map((label, index) => {
-        const percentage = total > 0 ? ((values[index] / total) * 100).toFixed(2) : 0;
-        return `
-            <tr>
-                <td>${formatLabel(label, reportType)}</td>
-                <td>${values[index]}</td>
-                <td>${percentage}%</td>
-            </tr>
-        `;
-    }).join('');
-}
-
-async function loadDepartmentDetails() {
-    const deptId = document.getElementById('department-chart-selector').value;
-    const period = document.getElementById('period').value;
-    
-    try {
-        const params = new URLSearchParams();
-        params.append('department', deptId);
-        
-        if (period === 'custom') {
-            params.append('startDate', document.getElementById('start-date').value);
-            params.append('endDate', document.getElementById('end-date').value);
-        } else {
-            params.append('period', translatePeriodToBackend(period));
-        }
-
-        const response = await fetch(`${API_BASE_URL}${ENDPOINTS.DEPARTMENT_DETAILS}?${params.toString()}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-            }
-        });
-
-        if (!response.ok) throw new Error('Erro ao carregar detalhes');
-        
-        const data = await response.json();
-        updateDepartmentReport(data);
-        
-    } catch (error) {
-        console.error('Erro:', error);
-        showAlert('error', 'Falha ao carregar detalhes do departamento');
-    }
-}
-
-function updateDepartmentReport(data) {
-    // Mapear os dados do backend para o formato esperado
-    const labels = ['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO', 'ATRASO'];
-    const values = labels.map(label => data[label.toLowerCase()] || 0);
-    
-    // Atualizar gráfico de departamento
-    departmentChart.data.labels = labels.map(label => formatLabel(label, 'status'));
-    departmentChart.data.datasets[0].data = values;
-    departmentChart.update();
-
-    // Atualizar tabela de departamento
-    const tableBody = document.getElementById('department-data');
-    const total = values.reduce((sum, val) => sum + val, 0);
-    
-    tableBody.innerHTML = labels.map((label, index) => {
-        const percentage = total > 0 ? ((values[index] / total) * 100).toFixed(2) : 0;
-        return `
-            <tr>
-                <td>${formatLabel(label, 'status')}</td>
-                <td>${values[index]}</td>
-                <td>${percentage}%</td>
-            </tr>
-        `;
-    }).join('');
-}
-
-// ==============================================
-// FUNÇÕES AUXILIARES
-// ==============================================
-
-function formatLabel(label, type) {
-    const labels = {
-        status: {
-            'ABERTO': 'Aberto',
-            'EM_ANDAMENTO': 'Em Andamento',
-            'RESOLVIDO': 'Resolvido',
-            'ATRASO': 'Atrasado',
-            'CANCELADO': 'Cancelado'
-        },
-        department: {
-            'TI': 'Tecnologia da Informação',
-            'RH': 'Recursos Humanos',
-            'FINANCEIRO': 'Financeiro',
-            'MARKETING': 'Marketing'
-        }
-    };
-    
-    return labels[type]?.[label] || label;
-}
-
-function translatePeriodToBackend(period) {
-    const periods = {
-        'today': 'today',
-        'week': 'week',
-        'month': 'month',
-        'quarter': 'quarter',
-        'year': 'year'
-    };
-    return periods[period] || 'month';
-}
-
-function setupEventListeners() {
-    // Filtros principais
-    document.getElementById('report-type').addEventListener('change', loadReportData);
-    document.getElementById('period').addEventListener('change', function() {
-        document.getElementById('custom-date-range').style.display = 
-            this.value === 'custom' ? 'block' : 'none';
-        loadReportData();
     });
-    
-    document.getElementById('start-date').addEventListener('change', loadReportData);
-    document.getElementById('end-date').addEventListener('change', loadReportData);
-    
-    // Filtro de departamento
-    document.getElementById('department-chart-selector').addEventListener('change', loadDepartmentDetails);
-    
-    // Botões de exportação
-    document.getElementById('generate-pdf').addEventListener('click', generatePDF);
-    document.getElementById('export-excel').addEventListener('click', exportExcel);
-}
 
-function generatePDF() {
-    // Implementar geração de PDF
-    alert('PDF será gerado aqui');
-}
+    // Configurar gráfico de técnicos (gráfico de barras)
+    const techCtx = document.getElementById('technician-chart').getContext('2d');
+    const technicianChart = new Chart(techCtx, {
+        type: 'bar',
+        data: {
+            labels: demoData.technicians.map(t => t.name),
+            datasets: [
+                {
+                    label: 'Total de Chamados',
+                    data: demoData.technicians.map(t => t.total),
+                    backgroundColor: '#36A2EB',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Resolvidos',
+                    data: demoData.technicians.map(t => t.resolved),
+                    backgroundColor: '#4BC0C0',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Desempenho dos Técnicos',
+                    font: {
+                        size: 16
+                    }
+                },
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
 
-function exportExcel() {
-    // Implementar exportação para Excel
-    alert('Excel será exportado aqui');
-}
+    // Mostrar/ocultar seleção de datas personalizadas
+    document.getElementById('period').addEventListener('change', function() {
+        const customRange = document.getElementById('custom-date-range');
+        customRange.style.display = this.value === 'custom' ? 'block' : 'none';
+    });
 
-function showAlert(type, message) {
-    // Implementar um sistema de alerta mais sofisticado
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type}`;
-    alertDiv.textContent = message;
-    
-    document.body.prepend(alertDiv);
-    
-    setTimeout(() => {
-        alertDiv.remove();
-    }, 5000);
-}
+    // Simular geração de relatório
+    document.getElementById('generate-report').addEventListener('click', function() {
+        alert('Relatório gerado com sucesso! Os gráficos foram atualizados.');
+        // Aqui você poderia adicionar lógica para atualizar os gráficos com base nas seleções
+    });
+
+    // Adicionar eventos aos botões de filtro
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const category = this.closest('tr').querySelector('td').textContent;
+            alert(`Filtrando por: ${category}`);
+        });
+    });
+
+    // Adicionar eventos aos botões de detalhes
+    document.querySelectorAll('.details-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const dept = this.closest('tr').querySelector('td').textContent;
+            alert(`Mostrando detalhes do departamento: ${dept}`);
+        });
+    });
+});

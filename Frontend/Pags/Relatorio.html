@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HelpOffice - Relatórios</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../CSS/Styles_Relatorio.css">
-    <script src="../JS/Relatorio.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-
 <body>
     <!-- Header Section -->
     <header class="header">
@@ -18,13 +18,53 @@
         </div>
 
         <div class="user-info">
-            <div class="user-avatar" id="user-avatar"></div>
-            <div class="user-name" id="user-name"></div>
+            <div class="user-avatar" id="user-avatar">HS</div>
+            <div class="user-name" id="user-name">Supervisor - Ana Silva</div>
             <a href="../Pags/TecMenu.html" class="report-btn">Gerenciamento</a>
         </div>
     </header>
 
     <div class="container">
+        <!-- Summary Cards -->
+        <div class="stats-container">
+            <div class="stat-card total">
+                <div class="stat-icon"><i class="fas fa-ticket-alt"></i></div>
+                <div class="stat-value" id="total-tickets">0</div>
+                <div class="stat-label">Total de Chamados</div>
+                <a href="#" class="stat-link" id="link-total">Ver detalhes</a>
+            </div>
+            <div class="stat-card open">
+                <div class="stat-icon"><i class="fas fa-hourglass-start"></i></div>
+                <div class="stat-value" id="open-tickets">0</div>
+                <div class="stat-label">Abertos</div>
+                <a href="#" class="stat-link" id="link-open">Ver lista</a>
+            </div>
+            <div class="stat-card progress">
+                <div class="stat-icon"><i class="fas fa-tools"></i></div>
+                <div class="stat-value" id="progress-tickets">0</div>
+                <div class="stat-label">Em Andamento</div>
+                <a href="#" class="stat-link" id="link-progress">Ver técnicos</a>
+            </div>
+            <div class="stat-card resolved">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-value" id="resolved-tickets">0</div>
+                <div class="stat-label">Resolvidos</div>
+                <a href="#" class="stat-link" id="link-resolved">Ver eficiência</a>
+            </div>
+            <div class="stat-card overdue">
+                <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="stat-value" id="overdue-tickets">0</div>
+                <div class="stat-label">Atrasados</div>
+                <a href="#" class="stat-link" id="link-overdue">Analisar causas</a>
+            </div>
+            <div class="stat-card efficiency">
+                <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="stat-value" id="efficiency-rate">0%</div>
+                <div class="stat-label">Taxa de Resolução</div>
+                <a href="#" class="stat-link" id="link-efficiency">Ver histórico</a>
+            </div>
+        </div>
+
         <!-- Report Configuration Section -->
         <div class="card">
             <h2 class="card-title"><i class="fas fa-chart-bar"></i> Configuração de Relatórios</h2>
@@ -39,6 +79,7 @@
                             <option value="technician">Chamados por Técnico</option>
                             <option value="time">Tempo Médio de Resolução</option>
                             <option value="priority">Chamados por Prioridade</option>
+                            <option value="trend">Tendências Mensais</option>
                         </select>
                     </div>
 
@@ -72,69 +113,91 @@
             </div>
         </div>
 
-        <!-- Report Visualization Section -->
-        <div class="report-visualization">
-            <div class="chart-container">
-                <canvas id="main-chart"></canvas>
-            </div>
-            <div class="table-container">
-                <table id="report-table">
-                    <thead>
-                        <tr>
-                            <th>Categoria</th>
-                            <th>Quantidade</th>
-                            <th>Porcentagem</th>
-                        </tr>
-                    </thead>
-                    <tbody id="report-data">
-                        <!-- Dados serão carregados dinamicamente -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <table id="report-table">
+    <thead>
+        <tr>
+            <th>Categoria</th>
+            <th>Quantidade</th>
+            <th>Porcentagem</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody id="report-data">
+        <tr>
+            <td>Abertos</td>
+            <td>0</td>
+            <td>0%</td>
+            <td><button class="filter-btn"><i class="fas fa-filter"></i> Filtrar</button></td>
+        </tr>
+        <tr>
+            <td>Em Andamento</td>
+            <td>0</td>
+            <td>0%</td>
+            <td><button class="filter-btn"><i class="fas fa-filter"></i> Filtrar</button></td>
+        </tr>
+        <tr>
+            <td>Resolvidos</td>
+            <td>0</td>
+            <td>0%</td>
+            <td><button class="filter-btn"><i class="fas fa-filter"></i> Filtrar</button></td>
+        </tr>
+        <tr>
+            <td>Atrasados</td>
+            <td>0</td>
+            <td>0%</td>
+            <td><button class="filter-btn"><i class="fas fa-filter"></i> Filtrar</button></td>
+        </tr>
+    </tbody>
+</table>
 
-        <!-- Management Section -->
-        <div class="card management-section">
-            <div class="management-title">
-                <i class="fas fa-cog"></i> Gerenciamento - Painel Adm
+        <!-- Detailed Reports Section -->
+        <div class="detailed-reports">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-chart-pie"></i> Detalhes por Departamento</h2>
+                <div class="chart-container">
+                    <canvas id="department-chart"></canvas>
+                </div>
+                <div class="table-container">
+                    <table id="department-table">
+                        <thead>
+                            <tr>
+                                <th>Departamento</th>
+                                <th>Abertos</th>
+                                <th>Andamento</th>
+                                <th>Resolvidos</th>
+                                <th>Detalhes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="department-data">
+                            <!-- Dados serão carregados dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="btn-group">
-                <button class="btn btn-primary" id="generate-pdf">
-                    <i class="fas fa-file-pdf"></i> Gerar Relatório PDF
-                </button>
-                <button class="btn btn-success" id="export-excel">
-                    <i class="fas fa-file-excel"></i> Exportar para Excel
-                </button>
-            </div>
-        </div>
 
-        <!-- Department Details Section -->
-        <div class="card">
-            <h2 class="card-title"><i class="fas fa-chart-pie"></i>
-                <select id="department-chart-selector" class="chart-selector">
-                    <!-- Departamentos serão carregados dinamicamente -->
-                </select>
-                - Status Detalhado
-            </h2>
-            <div class="chart-container">
-                <canvas id="department-chart"></canvas>
-            </div>
-            <div class="table-container">
-                <table id="department-table">
-                    <thead>
-                        <tr>
-                            <th>Status</th>
-                            <th>Quantidade</th>
-                            <th>Porcentagem</th>
-                        </tr>
-                    </thead>
-                    <tbody id="department-data">
-                        <!-- Dados serão carregados dinamicamente -->
-                    </tbody>
-                </table>
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-user-tie"></i> Desempenho por Técnico</h2>
+                <div class="chart-container">
+                    <canvas id="technician-chart"></canvas>
+                </div>
+                <div class="table-container">
+                    <table id="technician-table">
+                        <thead>
+                            <tr>
+                                <th>Técnico</th>
+                                <th>Chamados</th>
+                                <th>Resolvidos</th>
+                                <th>Tempo Médio</th>
+                                <th>Eficiência</th>
+                            </tr>
+                        </thead>
+                        <tbody id="technician-data">
+                            <!-- Dados serão carregados dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
 
     <!-- Footer -->
     <footer class="footer">
@@ -142,10 +205,6 @@
         <div class="slogan">Nada se perde, tudo se resolve.</div>
     </footer>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="../JS/Relatorio.js"></script>
 </body>
-
 </html>
